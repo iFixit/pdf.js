@@ -31,6 +31,7 @@ limitations under the License.
 <!--#endif-->
 
     <link rel="stylesheet" href="viewer.css"/>
+    <link rel="stylesheet" href="viewer_ifixit.css"/>
 <!--#if !PRODUCTION-->
     <link rel="resource" type="application/l10n" href="locale/locale.properties"/>
 <!--#endif-->
@@ -44,16 +45,16 @@ limitations under the License.
 <!--#endif-->
 
 <!--#if !PRODUCTION-->
-    <script type="text/javascript" src="../src/shared/util.js"></script>
-    <script type="text/javascript" src="../src/shared/colorspace.js"></script>
-    <script type="text/javascript" src="../src/shared/pattern.js"></script>
-    <script type="text/javascript" src="../src/shared/function.js"></script>
-    <script type="text/javascript" src="../src/shared/annotation.js"></script>
-    <script type="text/javascript" src="../src/display/api.js"></script>
-    <script type="text/javascript" src="../src/display/metadata.js"></script>
-    <script type="text/javascript" src="../src/display/canvas.js"></script>
-    <script type="text/javascript" src="../src/display/font_loader.js"></script>
-    <script type="text/javascript">PDFJS.workerSrc = '../src/worker_loader.js';</script>
+    <script type="text/javascript" src="/static/pdfjs/src/shared/util.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/shared/colorspace.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/shared/pattern.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/shared/function.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/shared/annotation.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/display/api.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/display/metadata.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/display/canvas.js"></script>
+    <script type="text/javascript" src="/static/pdfjs/src/display/font_loader.js"></script>
+    <script type="text/javascript">PDFJS.workerSrc = '/static/pdfjs/src/worker_loader.js';</script>
 <!--#endif-->
 
 <!--#if GENERIC -->
@@ -132,10 +133,10 @@ limitations under the License.
               <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
             </button>
 
-            <button id="secondaryOpenFile" class="secondaryToolbarButton openFile visibleLargeView" title="Open File" tabindex="19" data-l10n-id="open_file">
+            <!-- <button id="secondaryOpenFile" class="secondaryToolbarButton openFile visibleLargeView" title="Open File" tabindex="19" data-l10n-id="open_file"> 
               <span data-l10n-id="open_file_label">Open</span>
             </button>
-
+            -->
             <button id="secondaryPrint" class="secondaryToolbarButton print visibleMediumView" title="Print" tabindex="20" data-l10n-id="print">
               <span data-l10n-id="print_label">Print</span>
             </button>
@@ -171,6 +172,24 @@ limitations under the License.
             <button id="toggleHandTool" class="secondaryToolbarButton handTool" title="Enable hand tool" tabindex="27" data-l10n-id="hand_tool_enable">
               <span data-l10n-id="hand_tool_enable_label">Enable hand tool</span>
             </button>
+
+                  <span id="scaleSelectContainer" class="dropdownToolbarButton">
+                     <select id="scaleSelect" title="Zoom" tabindex="11" data-l10n-id="zoom">
+                      <option id="pageAutoOption" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
+                      <option id="pageActualOption" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
+                      <option id="pageFitOption" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
+                      <option id="pageWidthOption" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
+                      <option id="customScaleOption" value="custom"></option>
+                      <option value="0.5">50%</option>
+                      <option value="0.75">75%</option>
+                      <option value="1">100%</option>
+                      <option value="1.25">125%</option>
+                      <option value="1.5">150%</option>
+                      <option value="2">200%</option>
+                    </select>
+                  </span>
+
+
           </div>
         </div>  <!-- secondaryToolbar -->
 
@@ -194,19 +213,29 @@ limitations under the License.
                     <span data-l10n-id="next_label">Next</span>
                   </button>
                 </div>
+
                 <label id="pageNumberLabel" class="toolbarLabel" for="pageNumber" data-l10n-id="page_label">Page: </label>
                 <input type="number" id="pageNumber" class="toolbarField pageNumber" value="1" size="4" min="1" tabindex="8">
                 <span id="numPages" class="toolbarLabel"></span>
+
               </div>
               <div id="toolbarViewerRight">
+                  <div class="splitToolbarButton">
+                    <button id="zoomOut" class="toolbarButton zoomOut" title="Zoom Out" tabindex="9" data-l10n-id="zoom_out">
+                      <span data-l10n-id="zoom_out_label">Zoom Out</span>
+                    </button>
+                    <div class="splitToolbarButtonSeparator"></div>
+                    <button id="zoomIn" class="toolbarButton zoomIn" title="Zoom In" tabindex="10" data-l10n-id="zoom_in">
+                      <span data-l10n-id="zoom_in_label">Zoom In</span>
+                     </button>
+                  </div>
+
                 <button id="presentationMode" class="toolbarButton presentationMode hiddenLargeView" title="Switch to Presentation Mode" tabindex="12" data-l10n-id="presentation_mode">
                   <span data-l10n-id="presentation_mode_label">Presentation Mode</span>
                 </button>
-
                 <button id="openFile" class="toolbarButton openFile hiddenLargeView" title="Open File" tabindex="13" data-l10n-id="open_file">
                   <span data-l10n-id="open_file_label">Open</span>
                 </button>
-
                 <button id="print" class="toolbarButton print hiddenMediumView" title="Print" tabindex="14" data-l10n-id="print">
                   <span data-l10n-id="print_label">Print</span>
                 </button>
@@ -215,7 +244,8 @@ limitations under the License.
                   <span data-l10n-id="download_label">Download</span>
                 </button>
                 <!-- <div class="toolbarButtonSpacer"></div> -->
-                <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" title="Current view (copy or open in new window)" tabindex="16" data-l10n-id="bookmark">
+                
+                <a href="#" id="viewBookmark" class="toolbarButton bookmark hiddenSmallView" style="display:none" title="Current view (copy or open in new window)" tabindex="16" data-l10n-id="bookmark">
                   <span data-l10n-id="bookmark_label">Current View</span>
                 </a>
 
@@ -227,31 +257,8 @@ limitations under the License.
               </div>
               <div class="outerCenter">
                 <div class="innerCenter" id="toolbarViewerMiddle">
-                  <div class="splitToolbarButton">
-                    <button id="zoomOut" class="toolbarButton zoomOut" title="Zoom Out" tabindex="9" data-l10n-id="zoom_out">
-                      <span data-l10n-id="zoom_out_label">Zoom Out</span>
-                    </button>
-                    <div class="splitToolbarButtonSeparator"></div>
-                    <button id="zoomIn" class="toolbarButton zoomIn" title="Zoom In" tabindex="10" data-l10n-id="zoom_in">
-                      <span data-l10n-id="zoom_in_label">Zoom In</span>
-                     </button>
-                  </div>
-                  <span id="scaleSelectContainer" class="dropdownToolbarButton">
-                     <select id="scaleSelect" title="Zoom" tabindex="11" data-l10n-id="zoom">
-                      <option id="pageAutoOption" value="auto" selected="selected" data-l10n-id="page_scale_auto">Automatic Zoom</option>
-                      <option id="pageActualOption" value="page-actual" data-l10n-id="page_scale_actual">Actual Size</option>
-                      <option id="pageFitOption" value="page-fit" data-l10n-id="page_scale_fit">Fit Page</option>
-                      <option id="pageWidthOption" value="page-width" data-l10n-id="page_scale_width">Full Width</option>
-                      <option id="customScaleOption" value="custom"></option>
-                      <option value="0.5">50%</option>
-                      <option value="0.75">75%</option>
-                      <option value="1">100%</option>
-                      <option value="1.25">125%</option>
-                      <option value="1.5">150%</option>
-                      <option value="2">200%</option>
-                    </select>
-                  </span>
                 </div>
+
               </div>
             </div>
             <div id="loadingBar">

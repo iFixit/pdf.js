@@ -27,7 +27,7 @@ html {
 body {
   height: 100%;
   background-color: #404040;
-  background-image: url(images/texture.png);
+  background-image: url(/static/pdfjs/web/images/texture.png);
 }
 
 body,
@@ -48,7 +48,7 @@ select {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #404040;
-  background-image: url(images/texture.png);
+  background-image: url(/static/pdfjs/web/images/texture.png);
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -59,7 +59,7 @@ select {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #404040;
-  background-image: url(images/texture.png);
+  background-image: url(/static/pdfjs/web/images/texture.png);
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -77,14 +77,14 @@ select {
 
 #viewerContainer:-ms-fullscreen::-ms-backdrop {
   background-color: #404040;
-  background-image: url(images/texture.png);
+  background-image: url(/static/pdfjs/web/images/texture.png);
 }
 
 #viewerContainer:fullscreen {
   top: 0px;
   border-top: 2px solid transparent;
   background-color: #404040;
-  background-image: url(images/texture.png);
+  background-image: url(/static/pdfjs/web/images/texture.png);
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -272,9 +272,9 @@ html[dir='rtl'] #sidebarContent {
 #toolbarSidebar {
   width: 200px;
   height: 32px;
-  background-color: #424242; /* fallback */
-  background-image: url(images/texture.png),
-                    linear-gradient(hsla(0,0%,30%,.99), hsla(0,0%,25%,.95));
+  background-color: #0A5ABF; /* fallback */
+  //background-image: url(/static/pdfjs/web/images/texture.png),
+  //                  linear-gradient(hsla(0,0%,30%,.2), hsla(0,0%,25%,.9));
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25),
 
               inset 0 -1px 0 hsla(0,0%,100%,.05),
@@ -285,9 +285,9 @@ html[dir='rtl'] #sidebarContent {
 #toolbarContainer, .findbar, .secondaryToolbar {
   position: relative;
   height: 32px;
-  background-color: #474747; /* fallback */
-  background-image: url(images/texture.png),
-                    linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
+  background-color: #0A5ABF; /* fallback */
+  //background-image: url(/static/pdfjs/web/images/texture.png),
+  //                  linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
   box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
               inset 0 1px 1px hsla(0,0%,0%,.15),
               inset 0 -1px 0 hsla(0,0%,100%,.05),
@@ -382,7 +382,7 @@ html[dir='rtl'] .findbar {
 }
 
 #findInput[data-status="pending"] {
-  background-image: url(images/loading-small.png);
+  background-image: url(/static/pdfjs/web/images/loading-small.png);
   background-repeat: no-repeat;
   background-position: right;
 }
@@ -724,7 +724,7 @@ html[dir='rtl'] .dropdownToolbarButton {
   max-width: 120px;
   padding: 3px 2px 2px;
   overflow: hidden;
-  background: url(images/toolbarButton-menuArrows.png) no-repeat;
+  background: url(/static/pdfjs/web/images/toolbarButton-menuArrows.png) no-repeat;
 }
 html[dir='ltr'] .dropdownToolbarButton {
   background-position: 95%;
@@ -821,63 +821,63 @@ html[dir="rtl"] .secondaryToolbarButton::before {
 }
 
 html[dir='ltr'] .toolbarButton#sidebarToggle::before {
-  content: url(images/toolbarButton-sidebarToggle.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-sidebarToggle.png);
 }
 html[dir='rtl'] .toolbarButton#sidebarToggle::before {
-  content: url(images/toolbarButton-sidebarToggle-rtl.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-sidebarToggle-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton#secondaryToolbarToggle::before {
-  content: url(images/toolbarButton-secondaryToolbarToggle.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-secondaryToolbarToggle.png);
 }
 html[dir='rtl'] .toolbarButton#secondaryToolbarToggle::before {
-  content: url(images/toolbarButton-secondaryToolbarToggle-rtl.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-secondaryToolbarToggle-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.findPrevious::before {
-  content: url(images/findbarButton-previous.png);
+  content: url(/static/pdfjs/web/images/findbarButton-previous.png);
 }
 html[dir='rtl'] .toolbarButton.findPrevious::before {
-  content: url(images/findbarButton-previous-rtl.png);
+  content: url(/static/pdfjs/web/images/findbarButton-previous-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.findNext::before {
-  content: url(images/findbarButton-next.png);
+  content: url(/static/pdfjs/web/images/findbarButton-next.png);
 }
 html[dir='rtl'] .toolbarButton.findNext::before {
-  content: url(images/findbarButton-next-rtl.png);
+  content: url(/static/pdfjs/web/images/findbarButton-next-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.pageUp::before {
-  content: url(images/toolbarButton-pageUp.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-pageUp.png);
 }
 html[dir='rtl'] .toolbarButton.pageUp::before {
-  content: url(images/toolbarButton-pageUp-rtl.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-pageUp-rtl.png);
 }
 
 html[dir='ltr'] .toolbarButton.pageDown::before {
-  content: url(images/toolbarButton-pageDown.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-pageDown.png);
 }
 html[dir='rtl'] .toolbarButton.pageDown::before {
-  content: url(images/toolbarButton-pageDown-rtl.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-pageDown-rtl.png);
 }
 
 .toolbarButton.zoomOut::before {
-  content: url(images/toolbarButton-zoomOut.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-zoomOut.png);
 }
 
 .toolbarButton.zoomIn::before {
-  content: url(images/toolbarButton-zoomIn.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-zoomIn.png);
 }
 
 .toolbarButton.presentationMode::before,
 .secondaryToolbarButton.presentationMode::before {
-  content: url(images/toolbarButton-presentationMode.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-presentationMode.png);
 }
 
 .toolbarButton.print::before,
 .secondaryToolbarButton.print::before {
-  content: url(images/toolbarButton-print.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-print.png);
   left: 6px;
 }
 
@@ -890,12 +890,12 @@ html[dir="rtl"] .secondaryToolbarButton.print::before {
 
 .toolbarButton.openFile::before,
 .secondaryToolbarButton.openFile::before {
-  content: url(images/toolbarButton-openFile.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-openFile.png);
 }
 
 .toolbarButton.download::before,
 .secondaryToolbarButton.download::before {
-  content: url(images/toolbarButton-download.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-download.png);
 }
 
 .toolbarButton.bookmark,
@@ -917,22 +917,22 @@ html[dir="rtl"] .secondaryToolbarButton.print::before {
 
 .toolbarButton.bookmark::before,
 .secondaryToolbarButton.bookmark::before {
-  content: url(images/toolbarButton-bookmark.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-bookmark.png);
 }
 
 #viewThumbnail.toolbarButton::before {
-  content: url(images/toolbarButton-viewThumbnail.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-viewThumbnail.png);
 }
 
 html[dir="ltr"] #viewOutline.toolbarButton::before {
-  content: url(images/toolbarButton-viewOutline.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-viewOutline.png);
 }
 html[dir="rtl"] #viewOutline.toolbarButton::before {
-  content: url(images/toolbarButton-viewOutline-rtl.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-viewOutline-rtl.png);
 }
 
 #viewFind.toolbarButton::before {
-  content: url(images/toolbarButton-search.png);
+  content: url(/static/pdfjs/web/images/toolbarButton-search.png);
 }
 
 .secondaryToolbarButton {
@@ -968,23 +968,23 @@ html[dir="rtl"] .secondaryToolbarButton > span {
 }
 
 .secondaryToolbarButton.firstPage::before {
-  content: url(images/secondaryToolbarButton-firstPage.png);
+  content: url(/static/pdfjs/web/images/secondaryToolbarButton-firstPage.png);
 }
 
 .secondaryToolbarButton.lastPage::before {
-  content: url(images/secondaryToolbarButton-lastPage.png);
+  content: url(/static/pdfjs/web/images/secondaryToolbarButton-lastPage.png);
 }
 
 .secondaryToolbarButton.rotateCcw::before {
-  content: url(images/secondaryToolbarButton-rotateCcw.png);
+  content: url(/static/pdfjs/web/images/secondaryToolbarButton-rotateCcw.png);
 }
 
 .secondaryToolbarButton.rotateCw::before {
-  content: url(images/secondaryToolbarButton-rotateCw.png);
+  content: url(/static/pdfjs/web/images/secondaryToolbarButton-rotateCw.png);
 }
 
 .secondaryToolbarButton.handTool::before {
-  content: url(images/secondaryToolbarButton-handTool.png);
+  content: url(/static/pdfjs/web/images/secondaryToolbarButton-handTool.png);
 }
 
 .verticalToolbarSeparator {
@@ -1245,7 +1245,7 @@ canvas {
   overflow: visible;
   border: 9px solid transparent;
   background-clip: content-box;
-  border-image: url(images/shadow.png) 9 9 repeat;
+  border-image: url(/static/pdfjs/web/images/shadow.png) 9 9 repeat;
   background-color: white;
 }
 
@@ -1269,7 +1269,7 @@ canvas {
   top: 0;
   right: 0;
   bottom: 0;
-  background: url('images/loading-icon.gif') center no-repeat;
+  background: url('/static/pdfjs/web/images/loading-icon.gif') center no-repeat;
 }
 
 .textLayer {
@@ -1403,7 +1403,7 @@ canvas {
   line-height: 14px;
   text-align: center;
   background-color: #474747; /* fallback */
-  background-image: url(images/texture.png),
+  background-image: url(/static/pdfjs/web/images/texture.png),
                     linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
   box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
               inset 0 1px 1px hsla(0,0%,0%,.15),
@@ -1500,14 +1500,14 @@ canvas {
 }
 
 .grab-to-pan-grab * {
-  cursor: url("images/grab.cur"), move !important;
+  cursor: url("/static/pdfjs/web/images/grab.cur"), move !important;
   cursor: -webkit-grab !important;
   cursor: -moz-grab !important;
   cursor: grab !important;
 }
 .grab-to-pan-grabbing,
 .grab-to-pan-grabbing * {
-  cursor: url("images/grabbing.cur"), move !important;
+  cursor: url("/static/pdfjs/web/images/grabbing.cur"), move !important;
   cursor: -webkit-grabbing !important;
   cursor: -moz-grabbing !important;
   cursor: grabbing !important;
