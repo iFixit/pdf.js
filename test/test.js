@@ -25,7 +25,6 @@ var path = require('path');
 var fs = require('fs');
 var os = require('os');
 var url = require('url');
-var spawn = require('child_process').spawn;
 var testUtils = require('./testutils.js');
 
 function parseOptions() {
@@ -419,6 +418,12 @@ function checkRefTestResults(browser, id, results) {
     default:
       throw new Error('Unknown test type');
   }
+  // clear memory
+  results.forEach(function (roundResults, round) {
+    roundResults.forEach(function (pageResult, page) {
+      pageResult.snapshot = null;
+    });
+  });
 }
 
 function refTestPostHandler(req, res) {
@@ -624,22 +629,6 @@ function startBrowsers(url, initSessionCallback) {
   });
 }
 
-function stopBrowsers(callback) {
-  var count = sessions.length;
-  sessions.forEach(function (session) {
-    if (session.closed) {
-      return;
-    }
-    session.browser.stop(function () {
-      session.closed = true;
-      count--;
-      if (count === 0 && callback) {
-        callback();
-      }
-    });
-  });
-}
-
 function getServerBaseAddress() {
   return 'http://' + host + ':' + server.port;
 }
@@ -649,6 +638,7 @@ function startServer() {
   server.host = host;
   server.port = options.port;
   server.root = '..';
+  server.cacheExpirationTime = 3600;
   server.start();
 }
 
@@ -683,7 +673,6 @@ function closeSession(browser) {
 
 function ensurePDFsDownloaded(callback) {
   var downloadUtils = require('./downloadutils.js');
-  var downloadManifestFiles = downloadUtils.downloadManifestFiles;
   var manifest = JSON.parse(fs.readFileSync(options.manifestFile));
   downloadUtils.downloadManifestFiles(manifest, function () {
     downloadUtils.verifyManifestFiles(manifest, function (hasErrors) {

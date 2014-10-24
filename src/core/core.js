@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 /* globals assert, calculateMD5, Catalog, Dict, error, info, isArray,
-           isArrayBuffer, isName, isStream, isString, LegacyPromise,
+           isArrayBuffer, isName, isStream, isString, createPromiseCapability,
            Linearization, NullStream, PartialEvaluator, shadow, Stream, Lexer,
            StreamsSequenceStream, stringToPDFString, stringToBytes, Util, XRef,
            MissingDataException, Promise, Annotation, ObjectLoader, OperatorList
@@ -141,32 +141,21 @@ var Page = (function PageClosure() {
       return stream;
     },
 
-    loadResources: function(keys) {
+    loadResources: function Page_loadResources(keys) {
       if (!this.resourcesPromise) {
         // TODO: add async getInheritedPageProp and remove this.
         this.resourcesPromise = this.pdfManager.ensure(this, 'resources');
       }
-      var promise = new LegacyPromise();
-      this.resourcesPromise.then(function resourceSuccess() {
+      return this.resourcesPromise.then(function resourceSuccess() {
         var objectLoader = new ObjectLoader(this.resources.map,
                                             keys,
                                             this.xref);
-        objectLoader.load().then(function objectLoaderSuccess() {
-          promise.resolve();
-        });
+        return objectLoader.load();
       }.bind(this));
-      return promise;
     },
 
     getOperatorList: function Page_getOperatorList(handler, intent) {
       var self = this;
-      var promise = new LegacyPromise();
-
-      function reject(e) {
-        promise.reject(e);
-      }
-
-      var pageListPromise = new LegacyPromise();
 
       var pdfManager = this.pdfManager;
       var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
@@ -188,9 +177,8 @@ var Page = (function PageClosure() {
                                                   this.idCounters,
                                                   this.fontCache);
 
-      var dataPromises = Promise.all([contentStreamPromise, resourcesPromise],
-                                     reject);
-      dataPromises.then(function(data) {
+      var dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
+      var pageListPromise = dataPromises.then(function(data) {
         var contentStream = data[0];
         var opList = new OperatorList(intent, handler, self.pageIndex);
 
@@ -199,30 +187,30 @@ var Page = (function PageClosure() {
           pageIndex: self.pageIndex,
           intent: intent
         });
-        partialEvaluator.getOperatorList(contentStream, self.resources, opList);
-        pageListPromise.resolve(opList);
+        return partialEvaluator.getOperatorList(contentStream, self.resources,
+          opList).then(function () {
+            return opList;
+          });
       });
 
       var annotationsPromise = pdfManager.ensure(this, 'annotations');
-      Promise.all([pageListPromise, annotationsPromise]).then(function(datas) {
+      return Promise.all([pageListPromise, annotationsPromise]).then(
+          function(datas) {
         var pageOpList = datas[0];
         var annotations = datas[1];
 
         if (annotations.length === 0) {
           pageOpList.flush(true);
-          promise.resolve(pageOpList);
-          return;
+          return pageOpList;
         }
 
         var annotationsReadyPromise = Annotation.appendToOperatorList(
           annotations, pageOpList, pdfManager, partialEvaluator, intent);
-        annotationsReadyPromise.then(function () {
+        return annotationsReadyPromise.then(function () {
           pageOpList.flush(true);
-          promise.resolve(pageOpList);
-        }, reject);
-      }, reject);
-
-      return promise;
+          return pageOpList;
+        });
+      });
     },
 
     extractTextContent: function Page_extractTextContent() {
@@ -323,7 +311,7 @@ var PDFDocument = (function PDFDocumentClosure() {
     var str = strBuf.join('');
     stream.pos = pos;
     var index = backwards ? str.lastIndexOf(needle) : str.indexOf(needle);
-    if (index == -1) {
+    if (index === -1) {
       return false; /* not found */
     }
     stream.pos += index;
@@ -370,22 +358,15 @@ var PDFDocument = (function PDFDocumentClosure() {
     },
 
     get linearization() {
-      var length = this.stream.length;
-      var linearization = false;
-      if (length) {
+      var linearization = null;
+      if (this.stream.length) {
         try {
-          linearization = new Linearization(this.stream);
-          if (linearization.length != length) {
-            linearization = false;
-          }
+          linearization = Linearization.create(this.stream);
         } catch (err) {
           if (err instanceof MissingDataException) {
             throw err;
           }
-
-          info('The linearization data is not available ' +
-               'or unreadable PDF data is found');
-          linearization = false;
+          info(err);
         }
       }
       // shadow the prototype getter with a data property

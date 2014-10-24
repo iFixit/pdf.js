@@ -47,6 +47,7 @@ function WebServer() {
   this.port = 8000;
   this.server = null;
   this.verbose = false;
+  this.cacheExpirationTime = 0;
   this.disableRangeRequests = false;
   this.hooks = {
     'GET': [],
@@ -65,7 +66,6 @@ WebServer.prototype = {
     this.server = null;
   },
   _handler: function (req, res) {
-    var agent = req.headers['user-agent'];
     var url = req.url;
     var urlParts = /([^?]*)((?:\?(.*))?)/.exec(url);
     var pathPart = decodeURI(urlParts[1]), queryPart = urlParts[3];
@@ -91,6 +91,7 @@ WebServer.prototype = {
     }
 
     var disableRangeRequests = this.disableRangeRequests;
+    var cacheExpirationTime = this.cacheExpirationTime;
 
     var filePath;
     fs.realpath(path.join(this.root, pathPart), checkFile);
@@ -222,6 +223,11 @@ WebServer.prototype = {
       }
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Length', fileSize);
+      if (cacheExpirationTime > 0) {
+        var expireTime = new Date();
+        expireTime.setSeconds(expireTime.getSeconds() + cacheExpirationTime);
+        res.setHeader('Expires', expireTime.toUTCString());
+      }
       res.writeHead(200);
 
       stream.pipe(res);
