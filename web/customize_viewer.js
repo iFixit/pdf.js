@@ -15,11 +15,29 @@
     factory((root.pdfjsWebCustomizeViewer = {}), root.pdfjsWebDOMEvents);
   }
 }(this, function (exports, DOMEvents) {
+
+// If we are running this after `gulp generic`, DOMContentLoaded will not have
+// fired yet. If we run it from `gulp server`, it will have fired.
+if (document.readyState === "complete" || document.readyState === "loaded" ||
+ document.readyState === "interactive") {
+  initialize();
+} else {
+  document.addEventListener('DOMContentLoaded', initialize);
+}
+
+function initialize() {
   var eventBus = DOMEvents.getGlobalEventBus();
 
+  var pageNumberDisplay = document.getElementById('pageNumberDisplay');
   eventBus.on('pagechange', function(ev) {
-    var pageNumberDisplay = document.getElementById('pageNumberDisplay');
     pageNumberDisplay.innerText = ev.pageNumber;
   });
+
+  // The standard viewer only supports a rotate button in the dropdown.
+  var pageRotateCw = document.getElementById('toolbarPageRotateCw');
+  pageRotateCw.addEventListener('click', function (e) {
+    eventBus.dispatch('rotatecw');
+  });
+};
 
 }));
