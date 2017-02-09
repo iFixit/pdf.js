@@ -2,6 +2,11 @@
  * Custom css for our fork of pdf.js.
  */
 
-#mainContainer.landscape {
-  background-color: green;
+.rotateCw::before {
+  content: url(images/secondaryToolbarButton-rotateCw.png);
+}
+
+#mainContainer.landscape .rotateCw::before {
+  transform: rotate(-90deg);
+  transform-origin: 8px 8px;
 }
