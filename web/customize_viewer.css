@@ -24,3 +24,27 @@
   padding-right: 0;
   margin-right: 0;
 }
+
+/**
+ * The default viewer stops centering this at smaller screen sizes. We'd
+ * like it to be always centered, because it looks better with how we moved
+ * the buttons around.
+ */
+.outerCenter {
+  float: right !important;
+  right: 50% !important;
+  left: auto !important;
+}
+
+.innerCenter {
+  float: right !important;
+  right: -50% !important;
+  left: auto !important;
+}
+
+/* Leave space for the left buttons at very small screen sizes. */
+@media all and (max-width: 600px) {
+  .innerCenter {
+    margin-left: 72px;
+  }
+}
