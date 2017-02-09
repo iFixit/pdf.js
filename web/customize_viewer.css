@@ -1,0 +1,7 @@
+/**
+ * Custom css for our fork of pdf.js.
+ */
+
+#mainContainer.landscape {
+  background-color: green;
+}
