@@ -176,7 +176,7 @@ function webViewerLoad() {
     // *before* the viewer loads, to prevent issues in browsers relying on e.g.
     // the Promise/URL polyfill in src/shared/util.js (fixes issue 7448).
     require(['pdfjs-web/app', 'mozPrintCallback_polyfill.js',
-     'pdfjs-web/viewer_customize'], function (web) {
+     'pdfjs-web/customize_viewer'], function (web) {
       window.PDFViewerApplication = web.PDFViewerApplication;
       web.PDFViewerApplication.run(config);
     });

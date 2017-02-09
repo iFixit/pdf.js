@@ -1,7 +1,6 @@
-/*
- * Custom functionality for this fork of pdf.js.
+/**
+ * Custom functionality for our fork of pdf.js.
  */
-
 
 'use strict';
 
@@ -17,7 +16,7 @@
   }
 }(this, function (exports, DOMEvents, pdfjsWebApp) {
 
-/*
+/**
  * If we are running this after `gulp generic`, DOMContentLoaded will not have
  * fired yet. If we run it from `gulp server`, it will have fired.
  */
@@ -31,40 +30,59 @@ if (document.readyState === "complete" || document.readyState === "loaded" ||
 function initialize() {
   var eventBus = DOMEvents.getGlobalEventBus();
 
+  setupPageNumberDisplay(eventBus);
+  setupRotateButton(eventBus);
+  setupLandscapeIndicator(eventBus, pdfjsWebApp.PDFViewerApplication);
+}
+
+/**
+ * Displays the current page number in '#pageNumberDisplay'. The standard viewer
+ * displays it in an <input>, and we just want to display it in a <span>.
+ */
+function setupPageNumberDisplay(eventBus) {
   var pageNumberDisplay = document.getElementById('pageNumberDisplay');
   eventBus.on('pagechange', function(ev) {
     pageNumberDisplay.innerText = ev.pageNumber;
   });
+}
 
-  /*
-   * Add a "landscape" class to mainContainer when the pages are displayed in
-   * landscape. This can be used to style the rotate button.
-   */
-  var mainContainer = document.getElementById('mainContainer');
-  function isLandscape() {
-    return pdfjsWebApp.PDFViewerApplication.pdfViewer.isLandscape();
-  }
-  eventBus.on('pagesloaded', function() {
-    if (isLandscape()) {
-      // Set initial value.
-      mainContainer.classList.add('landscape');
-    }
-  });
-  eventBus.on('rotatecw', function() {
-    // This will be called before rotating, so negate isLandscape to get the
-    // value after rotating.
-    if (!isLandscape()) {
-      mainContainer.classList.add('landscape');
-    } else {
-      mainContainer.classList.remove('landscape');
-    }
-  });
-
-  // The standard viewer only supports a rotate button in the dropdown.
+/**
+ * The standard viewer only supports a rotate button in the dropdown menu, so
+ * we need to implement the same thing for the toolbar.
+ */
+function setupRotateButton(eventBus) {
   var pageRotateCw = document.getElementById('toolbarPageRotateCw');
-  pageRotateCw.addEventListener('click', function (e) {
+  pageRotateCw.addEventListener('click', function() {
     eventBus.dispatch('rotatecw');
   });
-};
+}
+
+/**
+ * Add a 'landscape' class to '#mainContainer' when the pages are displayed in
+ * landscape. This can be used to style the rotate button.
+ */
+function setupLandscapeIndicator(eventBus, viewerApp) {
+  var mainContainer = document.getElementById('mainContainer');
+
+  // Set the initial value on load.
+  eventBus.on('pagesloaded', function() {
+    if (viewerApp.pdfViewer.isLandscape()) {
+      mainContainer.classList.add('landscape');
+    }
+  });
+
+  // Update it every time the pages rotate.
+  eventBus.on('rotatecw', function() {
+    // The setTimeout is necessary because this event handler could get called
+    // before or after the handler that actually rotates the page.
+    setTimeout(function() {
+      if (viewerApp.pdfViewer.isLandscape()) {
+        mainContainer.classList.add('landscape');
+      } else {
+        mainContainer.classList.remove('landscape');
+      }
+    }, 0);
+  });
+}
 
 }));
