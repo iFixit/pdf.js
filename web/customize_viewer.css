@@ -2,6 +2,10 @@
  * Custom css for our fork of pdf.js.
  */
 
+/**
+ * Transform the rotate button depending on whether we're viewing it in
+ * landscape or portrait.
+ */
 .rotateCw::before {
   content: url(images/secondaryToolbarButton-rotateCw.png);
 }
@@ -9,4 +13,14 @@
 #mainContainer.landscape .rotateCw::before {
   transform: rotate(-90deg);
   transform-origin: 8px 8px;
+}
+
+/**
+ * Remove spacing between words when displaying
+ * <span>page</span><span>1</span></span>of 7</span>
+ */
+#pageLabel, #pageNumberDisplay {
+  min-width: 0;
+  padding-right: 0;
+  margin-right: 0;
 }
