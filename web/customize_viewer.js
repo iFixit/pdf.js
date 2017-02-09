@@ -67,7 +67,7 @@ function setupLandscapeIndicator(eventBus, viewerApp) {
   // Set the initial value on load.
   eventBus.on('pagesloaded', function() {
     if (viewerApp.pdfViewer.isLandscape()) {
-      mainContainer.classList.add('landscape');
+      mainContainer.className = 'landscape';
     }
   });
 
@@ -77,9 +77,9 @@ function setupLandscapeIndicator(eventBus, viewerApp) {
     // before or after the handler that actually rotates the page.
     setTimeout(function() {
       if (viewerApp.pdfViewer.isLandscape()) {
-        mainContainer.classList.add('landscape');
+        mainContainer.className = 'landscape';
       } else {
-        mainContainer.classList.remove('landscape');
+        mainContainer.className = '';
       }
     }, 0);
   });
