@@ -1,3 +1,10 @@
+# Since we use an API key for Travis CI we need to use the https url, and since
+# we use the ssh url privately we need to handle git submodules ourselves
+git:
+   submodules: false
+   before_install:
+     - git config submodule.test/ttx/fonttools-code.url https://github.com/behdad/fonttools.git
+     - git submodule update --init --recursive
 language: node_js
 node_js:
   - node
