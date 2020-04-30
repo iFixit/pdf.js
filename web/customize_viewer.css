@@ -50,6 +50,12 @@ body#lightTheme,
   position: relative;
   z-index: 10001;
 }
+#lightTheme .findbar .toolbarButton {
+   width: 30px;
+   height: 100%;
+   background-position: center;
+   margin: 4px;
+}
 
 #lightTheme .findbar label.toolbarLabel {
    color: #f0f0f0;
