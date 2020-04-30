@@ -858,18 +858,20 @@ html[dir='rtl'] .toolbarButton#secondaryToolbarToggle::before {
   content: url(images/toolbarButton-secondaryToolbarToggle-rtl.png);
 }
 
-html[dir='ltr'] .toolbarButton.findPrevious::before {
-  content: url(images/findbarButton-previous.png);
-}
-html[dir='rtl'] .toolbarButton.findPrevious::before {
-  content: url(images/findbarButton-previous-rtl.png);
+html[dir='ltr'] button#findPrevious {
+  background: url(images/findbarButton-previous.png) no-repeat;
 }
 
-html[dir='ltr'] .toolbarButton.findNext::before {
-  content: url(images/findbarButton-next.png);
+html[dir='rtl'] button#findPrevious {
+  background: url(images/findbarButton-previous-rtl.png) no-repeat;
 }
-html[dir='rtl'] .toolbarButton.findNext::before {
-  content: url(images/findbarButton-next-rtl.png);
+
+html[dir='ltr'] button#findNext {
+  background: url(images/findbarButton-next.png) no-repeat;
+}
+
+html[dir='rtl'] button#findNext {
+  background: url(images/findbarButton-next-rtl.png) no-repeat;
 }
 
 html[dir='ltr'] .toolbarButton.pageUp::before {
@@ -1633,18 +1635,18 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     content: url(images/toolbarButton-secondaryToolbarToggle-rtl@2x.png);
   }
 
-  html[dir='ltr'] .toolbarButton.findPrevious::before {
-    content: url(images/findbarButton-previous@2x.png);
+  html[dir='ltr'] button#findPrevious {
+    background: url(images/findbarButton-previous@2x.png) no-repeat;
   }
-  html[dir='rtl'] .toolbarButton.findPrevious::before {
-    content: url(images/findbarButton-previous-rtl@2x.png);
+  html[dir='rtl'] button#findPrevious {
+    background: url(images/findbarButton-previous-rtl@2x.png) no-repeat;
   }
 
-  html[dir='ltr'] .toolbarButton.findNext::before {
-    content: url(images/findbarButton-next@2x.png);
+  html[dir='ltr'] button#findNext {
+    background: url(images/findbarButton-next@2x.png) no-repeat;
   }
-  html[dir='rtl'] .toolbarButton.findNext::before {
-    content: url(images/findbarButton-next-rtl@2x.png);
+  html[dir='rtl'] button#findNext {
+    background: url(images/findbarButton-next-rtl@2x.png) no-repeat;
   }
 
   html[dir='ltr'] .toolbarButton.pageUp::before {
