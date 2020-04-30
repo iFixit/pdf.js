@@ -52,7 +52,7 @@ body#lightTheme,
 }
 
 #lightTheme .findbar label.toolbarLabel {
-      color: #f0f0f0;
+   color: #f0f0f0;
 }
 
 #lightTheme #toolbarSidebar::after {
