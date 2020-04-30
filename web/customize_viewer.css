@@ -51,6 +51,10 @@ body#lightTheme,
   z-index: 10001;
 }
 
+#lightTheme .findbar label.toolbarLabel {
+      color: #f0f0f0;
+}
+
 #lightTheme #toolbarSidebar::after {
   content: '';
   display: block;
