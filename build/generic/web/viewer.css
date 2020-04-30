@@ -316,6 +316,16 @@ body#lightTheme,
   position: relative;
   z-index: 10001;
 }
+#lightTheme .findbar .toolbarButton {
+   width: 30px;
+   height: 100%;
+   background-position: center;
+   margin: 4px;
+}
+
+#lightTheme .findbar label.toolbarLabel {
+   color: #f0f0f0;
+}
 
 #lightTheme #toolbarSidebar::after {
   content: '';
@@ -979,8 +989,6 @@ html[dir='rtl'] #toolbarSidebar {
   position: relative;
   height: 32px;
   background-color: #474747; /* fallback */
-  background-image: url("<?= pdfjsPath() ?>/images/texture.png"),
-                    linear-gradient(hsla(0,0%,32%,.99), hsla(0,0%,27%,.95));
 }
 html[dir='ltr'] #toolbarContainer, .findbar, .secondaryToolbar {
   box-shadow: inset 1px 0 0 hsla(0,0%,100%,.08),
@@ -1543,18 +1551,20 @@ html[dir='rtl'] .toolbarButton#secondaryToolbarToggle::before {
   content: url("<?= pdfjsPath() ?>/images/toolbarButton-secondaryToolbarToggle-rtl.png");
 }
 
-html[dir='ltr'] .toolbarButton.findPrevious::before {
-  content: url("<?= pdfjsPath() ?>/images/findbarButton-previous.png");
-}
-html[dir='rtl'] .toolbarButton.findPrevious::before {
-  content: url("<?= pdfjsPath() ?>/images/findbarButton-previous-rtl.png");
+html[dir='ltr'] button#findPrevious {
+  background: url("<?= pdfjsPath() ?>/images/findbarButton-previous.png") no-repeat;
 }
 
-html[dir='ltr'] .toolbarButton.findNext::before {
-  content: url("<?= pdfjsPath() ?>/images/findbarButton-next.png");
+html[dir='rtl'] button#findPrevious {
+  background: url("<?= pdfjsPath() ?>/images/findbarButton-previous-rtl.png") no-repeat;
 }
-html[dir='rtl'] .toolbarButton.findNext::before {
-  content: url("<?= pdfjsPath() ?>/images/findbarButton-next-rtl.png");
+
+html[dir='ltr'] button#findNext {
+  background: url("<?= pdfjsPath() ?>/images/findbarButton-next.png") no-repeat;
+}
+
+html[dir='rtl'] button#findNext {
+  background: url("<?= pdfjsPath() ?>/images/findbarButton-next-rtl.png") no-repeat;
 }
 
 html[dir='ltr'] .toolbarButton.pageUp::before {
@@ -2318,18 +2328,18 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
     content: url("<?= pdfjsPath() ?>/images/toolbarButton-secondaryToolbarToggle-rtl@2x.png");
   }
 
-  html[dir='ltr'] .toolbarButton.findPrevious::before {
-    content: url("<?= pdfjsPath() ?>/images/findbarButton-previous@2x.png");
+  html[dir='ltr'] button#findPrevious {
+    background: url("<?= pdfjsPath() ?>/images/findbarButton-previous@2x.png") no-repeat;
   }
-  html[dir='rtl'] .toolbarButton.findPrevious::before {
-    content: url("<?= pdfjsPath() ?>/images/findbarButton-previous-rtl@2x.png");
+  html[dir='rtl'] button#findPrevious {
+    background: url("<?= pdfjsPath() ?>/images/findbarButton-previous-rtl@2x.png") no-repeat;
   }
 
-  html[dir='ltr'] .toolbarButton.findNext::before {
-    content: url("<?= pdfjsPath() ?>/images/findbarButton-next@2x.png");
+  html[dir='ltr'] button#findNext {
+    background: url("<?= pdfjsPath() ?>/images/findbarButton-next@2x.png") no-repeat;
   }
-  html[dir='rtl'] .toolbarButton.findNext::before {
-    content: url("<?= pdfjsPath() ?>/images/findbarButton-next-rtl@2x.png");
+  html[dir='rtl'] button#findNext {
+    background: url("<?= pdfjsPath() ?>/images/findbarButton-next-rtl@2x.png") no-repeat;
   }
 
   html[dir='ltr'] .toolbarButton.pageUp::before {
