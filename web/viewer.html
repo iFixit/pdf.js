@@ -33,7 +33,9 @@ See https://github.com/adobe-type-tools/cmap-resources
 <!--#expand <link rel="stylesheet" href="<?= $viewerCSS ?>"> -->
 
 <!--#expand <script>window.workerPath = <?= $workerPath ?>;</script> -->
-<!--#expand <script src="<?= $pdfjsScript ?>"></script> -->
+<!--#expand <? foreach ($pdfViewerScripts as $script): ?> -->
+<!--#expand <script src="<?= $script ?>"></script> -->
+<!--#expand <? endforeach ?> -->
 <!--#expand <script src="<?= $assetPath ?>/compatibility.js"></script> -->
 
 <!--#endif-->
