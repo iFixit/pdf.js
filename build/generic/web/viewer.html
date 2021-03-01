@@ -29,6 +29,8 @@ See https://github.com/adobe-type-tools/cmap-resources
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="stylesheet" href="<?= $viewerCSS ?>"> 
 
+<script defer src="//cdn.polyfill.io/v3/polyfill.min.js?features=default,Object.entries,Number.isInteger,IntersectionObserver,NodeList.prototype.forEach,WeakSet,WeakMap,fetch,Array.prototype.flatMap"></script>
+
 <script>window.workerPath = <?= $workerPath ?>;</script> 
 <? foreach ($pdfViewerScripts as $script): ?> 
 <script src="<?= $script ?>"></script> 
