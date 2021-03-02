@@ -29,11 +29,13 @@ See https://github.com/adobe-type-tools/cmap-resources
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="stylesheet" href="<?= $viewerCSS ?>"> 
 
+<script defer src="//cdn.polyfill.io/v3/polyfill.min.js?features=default,Object.entries,Number.isInteger,IntersectionObserver,NodeList.prototype.forEach,WeakSet,WeakMap,fetch,Array.prototype.flatMap"></script>
+
 <script>window.workerPath = <?= $workerPath ?>;</script> 
 <? foreach ($pdfViewerScripts as $script): ?> 
-<script src="<?= $script ?>"></script> 
+<script defer src="<?= $script ?>"></script> 
 <? endforeach ?> 
-<script src="<?= $assetPath ?>/compatibility.js"></script> 
+<script defer src="<?= $assetPath ?>/compatibility.js"></script> 
 
     <title>PDF.js viewer</title>
 
@@ -47,11 +49,11 @@ See https://github.com/adobe-type-tools/cmap-resources
 
 <!-- This snippet is used in production (included from viewer.html) -->
 <link rel="resource" type="application/l10n" href="<?= $assetPath ?>/locale/locale.properties"> 
-<script src="<?= $assetPath ?>/l10n.js"></script> 
+<script defer src="<?= $assetPath ?>/l10n.js"></script> 
 
 
 
-<script src="<?= $viewerScript ?>"></script> 
+<script defer src="<?= $viewerScript ?>"></script> 
 
 
   </head>
