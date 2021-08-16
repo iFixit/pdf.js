@@ -28,6 +28,8 @@
 
 var isArray = sharedUtil.isArray;
 
+var EOF = {};
+
 var Name = (function NameClosure() {
   function Name(name) {
     this.name = name;
@@ -73,6 +75,7 @@ var Dict = (function DictClosure() {
     this.map = Object.create(null);
     this.xref = xref;
     this.objId = null;
+    this.suppressEncryption = false;
     this.__nonSerializable__ = nonSerializable; // disable cloning of the Dict
   }
 
@@ -84,40 +87,40 @@ var Dict = (function DictClosure() {
     // automatically dereferences Ref objects
     get: function Dict_get(key1, key2, key3) {
       var value;
-      var xref = this.xref;
+      var xref = this.xref, suppressEncryption = this.suppressEncryption;
       if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map ||
           typeof key2 === 'undefined') {
-        return xref ? xref.fetchIfRef(value) : value;
+        return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
       }
       if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map ||
           typeof key3 === 'undefined') {
-        return xref ? xref.fetchIfRef(value) : value;
+        return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
       }
       value = this.map[key3] || null;
-      return xref ? xref.fetchIfRef(value) : value;
+      return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
     },
 
     // Same as get(), but returns a promise and uses fetchIfRefAsync().
     getAsync: function Dict_getAsync(key1, key2, key3) {
       var value;
-      var xref = this.xref;
+      var xref = this.xref, suppressEncryption = this.suppressEncryption;
       if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map ||
           typeof key2 === 'undefined') {
         if (xref) {
-          return xref.fetchIfRefAsync(value);
+          return xref.fetchIfRefAsync(value, suppressEncryption);
         }
         return Promise.resolve(value);
       }
       if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map ||
           typeof key3 === 'undefined') {
         if (xref) {
-          return xref.fetchIfRefAsync(value);
+          return xref.fetchIfRefAsync(value, suppressEncryption);
         }
         return Promise.resolve(value);
       }
       value = this.map[key3] || null;
       if (xref) {
-        return xref.fetchIfRefAsync(value);
+        return xref.fetchIfRefAsync(value, suppressEncryption);
       }
       return Promise.resolve(value);
     },
@@ -125,7 +128,7 @@ var Dict = (function DictClosure() {
     // Same as get(), but dereferences all elements if the result is an Array.
     getArray: function Dict_getArray(key1, key2, key3) {
       var value = this.get(key1, key2, key3);
-      var xref = this.xref;
+      var xref = this.xref, suppressEncryption = this.suppressEncryption;
       if (!isArray(value) || !xref) {
         return value;
       }
@@ -134,7 +137,7 @@ var Dict = (function DictClosure() {
         if (!isRef(value[i])) {
           continue;
         }
-        value[i] = xref.fetch(value[i]);
+        value[i] = xref.fetch(value[i], suppressEncryption);
       }
       return value;
     },
@@ -267,6 +270,10 @@ var RefSetCache = (function RefSetCacheClosure() {
   return RefSetCache;
 })();
 
+function isEOF(v) {
+  return (v === EOF);
+}
+
 function isName(v, name) {
   return v instanceof Name && (name === undefined || v.name === name);
 }
@@ -292,12 +299,14 @@ function isStream(v) {
   return typeof v === 'object' && v !== null && v.getBytes !== undefined;
 }
 
+exports.EOF = EOF;
 exports.Cmd = Cmd;
 exports.Dict = Dict;
 exports.Name = Name;
 exports.Ref = Ref;
 exports.RefSet = RefSet;
 exports.RefSetCache = RefSetCache;
+exports.isEOF = isEOF;
 exports.isCmd = isCmd;
 exports.isDict = isDict;
 exports.isName = isName;

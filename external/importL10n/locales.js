@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* jshint node:true */
 
 'use strict';
 
@@ -63,10 +62,11 @@ function downloadLanguageFiles(root, langCode, callback) {
   files.forEach(function(fileName) {
     var outputPath = path.join(outputDir, fileName);
     var url = MOZ_AURORA_ROOT + langCode + MOZ_AURORA_PDFJS_DIR + fileName;
-    var request = https.get(url, function(response) {
+
+    https.get(url, function(response) {
       var content = '';
       response.setEncoding('utf8');
-      response.on("data", function(chunk) {
+      response.on('data', function(chunk) {
         content += chunk;
       });
       response.on('end', function() {
@@ -75,7 +75,7 @@ function downloadLanguageFiles(root, langCode, callback) {
         if (downloadsLeft === 0) {
           callback();
         }
-      })
+      });
     });
   });
 }

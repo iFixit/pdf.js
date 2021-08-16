@@ -48,6 +48,7 @@
   exports.renderTextLayer = displayTextLayer.renderTextLayer;
   exports.AnnotationLayer = displayAnnotationLayer.AnnotationLayer;
   exports.CustomStyle = displayDOMUtils.CustomStyle;
+  exports.createPromiseCapability = sharedUtil.createPromiseCapability;
   exports.PasswordResponses = sharedUtil.PasswordResponses;
   exports.InvalidPDFException = sharedUtil.InvalidPDFException;
   exports.MissingPDFException = sharedUtil.MissingPDFException;
@@ -55,12 +56,12 @@
   exports.UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
   exports.OPS = sharedUtil.OPS;
   exports.UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
-  exports.isValidUrl = sharedUtil.isValidUrl;
+  exports.isValidUrl = displayDOMUtils.isValidUrl;
+  exports.createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
   exports.createObjectURL = sharedUtil.createObjectURL;
   exports.removeNullCharacters = sharedUtil.removeNullCharacters;
   exports.shadow = sharedUtil.shadow;
   exports.createBlob = sharedUtil.createBlob;
   exports.getFilenameFromUrl = displayDOMUtils.getFilenameFromUrl;
   exports.addLinkAttributes = displayDOMUtils.addLinkAttributes;
-
 }));

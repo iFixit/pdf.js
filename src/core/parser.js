@@ -38,10 +38,12 @@ var isInt = sharedUtil.isInt;
 var isNum = sharedUtil.isNum;
 var isString = sharedUtil.isString;
 var warn = sharedUtil.warn;
+var EOF = corePrimitives.EOF;
 var Cmd = corePrimitives.Cmd;
 var Dict = corePrimitives.Dict;
 var Name = corePrimitives.Name;
 var Ref = corePrimitives.Ref;
+var isEOF = corePrimitives.isEOF;
 var isCmd = corePrimitives.isCmd;
 var isDict = corePrimitives.isDict;
 var isName = corePrimitives.isName;
@@ -56,12 +58,6 @@ var LZWStream = coreStream.LZWStream;
 var NullStream = coreStream.NullStream;
 var PredictorStream = coreStream.PredictorStream;
 var RunLengthStream = coreStream.RunLengthStream;
-
-var EOF = {};
-
-function isEOF(v) {
-  return (v === EOF);
-}
 
 var MAX_LENGTH_TO_CACHE = 1000;
 
@@ -248,29 +244,29 @@ var Parser = (function ParserClosure() {
           case 0xC1: // SOF1
           case 0xC2: // SOF2
           case 0xC3: // SOF3
-
+            /* falls through */
           case 0xC5: // SOF5
           case 0xC6: // SOF6
           case 0xC7: // SOF7
-
+            /* falls through */
           case 0xC9: // SOF9
           case 0xCA: // SOF10
           case 0xCB: // SOF11
-
+            /* falls through */
           case 0xCD: // SOF13
           case 0xCE: // SOF14
           case 0xCF: // SOF15
-
+            /* falls through */
           case 0xC4: // DHT
           case 0xCC: // DAC
-
+            /* falls through */
           case 0xDA: // SOS
           case 0xDB: // DQT
           case 0xDC: // DNL
           case 0xDD: // DRI
           case 0xDE: // DHP
           case 0xDF: // EXP
-
+            /* falls through */
           case 0xE0: // APP0
           case 0xE1: // APP1
           case 0xE2: // APP2
@@ -287,7 +283,7 @@ var Parser = (function ParserClosure() {
           case 0xED: // APP13
           case 0xEE: // APP14
           case 0xEF: // APP15
-
+            /* falls through */
           case 0xFE: // COM
             // The marker should be followed by the length of the segment.
             markerLength = stream.getUint16();
@@ -400,8 +396,11 @@ var Parser = (function ParserClosure() {
       var filter = dict.get('Filter', 'F'), filterName;
       if (isName(filter)) {
         filterName = filter.name;
-      } else if (isArray(filter) && isName(filter[0])) {
-        filterName = filter[0].name;
+      } else if (isArray(filter)) {
+        var filterZero = this.xref.fetchIfRef(filter[0]);
+        if (isName(filterZero)) {
+          filterName = filterZero.name;
+        }
       }
 
       // Parse image stream.
@@ -539,6 +538,9 @@ var Parser = (function ParserClosure() {
       var filter = dict.get('Filter', 'F');
       var params = dict.get('DecodeParms', 'DP');
       if (isName(filter)) {
+        if (isArray(params)) {
+          params = this.xref.fetchIfRef(params[0]);
+        }
         return this.makeFilter(stream, filter.name, length, params);
       }
 
@@ -547,14 +549,14 @@ var Parser = (function ParserClosure() {
         var filterArray = filter;
         var paramsArray = params;
         for (var i = 0, ii = filterArray.length; i < ii; ++i) {
-          filter = filterArray[i];
+          filter = this.xref.fetchIfRef(filterArray[i]);
           if (!isName(filter)) {
             error('Bad filter name: ' + filter);
           }
 
           params = null;
           if (isArray(paramsArray) && (i in paramsArray)) {
-            params = paramsArray[i];
+            params = this.xref.fetchIfRef(paramsArray[i]);
           }
           stream = this.makeFilter(stream, filter.name, maybeLength, params);
           // after the first stream the length variable is invalid
@@ -564,14 +566,14 @@ var Parser = (function ParserClosure() {
       return stream;
     },
     makeFilter: function Parser_makeFilter(stream, name, maybeLength, params) {
-      if (stream.dict.get('Length') === 0 && !maybeLength) {
+      // Since the 'Length' entry in the stream dictionary can be completely
+      // wrong, e.g. zero for non-empty streams, only skip parsing the stream
+      // when we can be absolutely certain that it actually is empty.
+      if (maybeLength === 0) {
         warn('Empty "' + name + '" stream.');
         return new NullStream(stream);
       }
       try {
-        if (params && this.xref) {
-          params = this.xref.fetchIfRef(params);
-        }
         var xrefStreamStats = this.xref.stats.streamTypes;
         if (name === 'FlateDecode' || name === 'Fl') {
           xrefStreamStats[StreamType.FLATE] = true;
@@ -596,11 +598,11 @@ var Parser = (function ParserClosure() {
         }
         if (name === 'DCTDecode' || name === 'DCT') {
           xrefStreamStats[StreamType.DCT] = true;
-          return new JpegStream(stream, maybeLength, stream.dict);
+          return new JpegStream(stream, maybeLength, stream.dict, params);
         }
         if (name === 'JPXDecode' || name === 'JPX') {
           xrefStreamStats[StreamType.JPX] = true;
-          return new JpxStream(stream, maybeLength, stream.dict);
+          return new JpxStream(stream, maybeLength, stream.dict, params);
         }
         if (name === 'ASCII85Decode' || name === 'A85') {
           xrefStreamStats[StreamType.A85] = true;
@@ -620,7 +622,7 @@ var Parser = (function ParserClosure() {
         }
         if (name === 'JBIG2Decode') {
           xrefStreamStats[StreamType.JBIG] = true;
-          return new Jbig2Stream(stream, maybeLength, stream.dict);
+          return new Jbig2Stream(stream, maybeLength, stream.dict, params);
         }
         warn('filter "' + name + '" not supported yet');
         return stream;
@@ -889,7 +891,7 @@ var Lexer = (function LexerClosure() {
             var x2 = toHexDigit(ch);
             if (x2 === -1) {
               warn('Lexer_getName: Illegal digit (' +
-                   String.fromCharCode(ch) +') in hexadecimal number.');
+                   String.fromCharCode(ch) + ') in hexadecimal number.');
               strBuf.push('#', String.fromCharCode(previousCh));
               if (specialChars[ch]) {
                 break;
@@ -1113,9 +1115,7 @@ var Linearization = {
   }
 };
 
-exports.EOF = EOF;
 exports.Lexer = Lexer;
 exports.Linearization = Linearization;
 exports.Parser = Parser;
-exports.isEOF = isEOF;
 }));

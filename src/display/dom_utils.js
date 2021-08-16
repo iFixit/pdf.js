@@ -26,8 +26,39 @@
   }
 }(this, function (exports, sharedUtil) {
 
+var assert = sharedUtil.assert;
 var removeNullCharacters = sharedUtil.removeNullCharacters;
 var warn = sharedUtil.warn;
+var deprecated = sharedUtil.deprecated;
+var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
+
+var DEFAULT_LINK_REL = 'noopener noreferrer nofollow';
+
+function DOMCanvasFactory() {}
+DOMCanvasFactory.prototype = {
+  create: function DOMCanvasFactory_create(width, height) {
+    assert(width > 0 && height > 0, 'invalid canvas size');
+    var canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+  },
+
+  reset: function DOMCanvasFactory_reset(canvas, width, height) {
+    assert(canvas, 'canvas is not specified');
+    assert(width > 0 && height > 0, 'invalid canvas size');
+    canvas.width = width;
+    canvas.height = height;
+  },
+
+  destroy: function DOMCanvasFactory_destroy(canvas) {
+    assert(canvas, 'canvas is not specified');
+    // Zeroing the width and height cause Firefox to release graphics
+    // resources immediately, which can greatly reduce memory consumption.
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+};
 
 /**
  * Optimised CSS custom property getter/setter.
@@ -69,7 +100,7 @@ var CustomStyle = (function CustomStyleClosure() {
       }
     }
 
-    //if all fails then set to undefined
+    // If all fails then set to undefined.
     return (_cache[propName] = 'undefined');
   };
 
@@ -83,17 +114,21 @@ var CustomStyle = (function CustomStyleClosure() {
   return CustomStyle;
 })();
 
-//#if !(FIREFOX || MOZCENTRAL || CHROME)
-function hasCanvasTypedArrays() {
-  var canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 1;
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.createImageData(1, 1);
-  return (typeof imageData.data.buffer !== 'undefined');
+var hasCanvasTypedArrays;
+if (typeof PDFJSDev === 'undefined' ||
+    !PDFJSDev.test('FIREFOX || MOZCENTRAL || CHROME')) {
+  hasCanvasTypedArrays = function hasCanvasTypedArrays() {
+    var canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 1;
+    var ctx = canvas.getContext('2d');
+    var imageData = ctx.createImageData(1, 1);
+    return (typeof imageData.data.buffer !== 'undefined');
+  };
+} else {
+  hasCanvasTypedArrays = function () {
+    return true;
+  };
 }
-//#else
-//function hasCanvasTypedArrays() { return true; }
-//#endif
 
 var LinkTarget = {
   NONE: 0, // Default value.
@@ -206,7 +241,7 @@ function getDefaultSetting(id) {
       globalSettings.externalLinkTarget = LinkTarget.NONE;
       return LinkTarget.NONE;
     case 'externalLinkRel':
-      return globalSettings ? globalSettings.externalLinkRel : 'noreferrer';
+      return globalSettings ? globalSettings.externalLinkRel : DEFAULT_LINK_REL;
     case 'enableStats':
       return !!(globalSettings && globalSettings.enableStats);
     default:
@@ -227,11 +262,20 @@ function isExternalLinkTargetSet() {
   }
 }
 
+function isValidUrl(url, allowRelative) {
+  deprecated('isValidUrl(), please use createValidAbsoluteUrl() instead.');
+  var baseUrl = allowRelative ? 'http://example.com' : null;
+  return createValidAbsoluteUrl(url, baseUrl) !== null;
+}
+
 exports.CustomStyle = CustomStyle;
 exports.addLinkAttributes = addLinkAttributes;
 exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
+exports.isValidUrl = isValidUrl;
 exports.getFilenameFromUrl = getFilenameFromUrl;
 exports.LinkTarget = LinkTarget;
 exports.hasCanvasTypedArrays = hasCanvasTypedArrays;
 exports.getDefaultSetting = getDefaultSetting;
+exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
+exports.DOMCanvasFactory = DOMCanvasFactory;
 }));

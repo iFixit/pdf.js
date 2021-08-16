@@ -41,6 +41,7 @@
   var deprecated = sharedUtil.deprecated;
   var warn = sharedUtil.warn;
   var LinkTarget = displayDOMUtils.LinkTarget;
+  var DEFAULT_LINK_REL = displayDOMUtils.DEFAULT_LINK_REL;
 
   var isWorker = (typeof window === 'undefined');
 
@@ -67,8 +68,12 @@
   }
   delete PDFJS.verbosity;
   Object.defineProperty(PDFJS, 'verbosity', {
-    get: function () { return sharedUtil.getVerbosityLevel(); },
-    set: function (level) { sharedUtil.setVerbosityLevel(level); },
+    get: function () {
+      return sharedUtil.getVerbosityLevel();
+    },
+    set: function (level) {
+      sharedUtil.setVerbosityLevel(level);
+    },
     enumerable: true,
     configurable: true
   });
@@ -76,7 +81,7 @@
   PDFJS.VERBOSITY_LEVELS = sharedUtil.VERBOSITY_LEVELS;
   PDFJS.OPS = sharedUtil.OPS;
   PDFJS.UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
-  PDFJS.isValidUrl = sharedUtil.isValidUrl;
+  PDFJS.isValidUrl = displayDOMUtils.isValidUrl;
   PDFJS.shadow = sharedUtil.shadow;
   PDFJS.createBlob = sharedUtil.createBlob;
   PDFJS.createObjectURL = function PDFJS_createObjectURL(data, contentType) {
@@ -233,7 +238,7 @@
    * @var {string}
    */
   PDFJS.externalLinkRel = (PDFJS.externalLinkRel === undefined ?
-                           'noreferrer' : PDFJS.externalLinkRel);
+                           DEFAULT_LINK_REL : PDFJS.externalLinkRel);
 
   /**
     * Determines if we can eval strings as JS. Primarily used to improve
@@ -243,39 +248,39 @@
   PDFJS.isEvalSupported = (PDFJS.isEvalSupported === undefined ?
                            true : PDFJS.isEvalSupported);
 
-//#if !MOZCENTRAL
-  var savedOpenExternalLinksInNewWindow = PDFJS.openExternalLinksInNewWindow;
-  delete PDFJS.openExternalLinksInNewWindow;
-  Object.defineProperty(PDFJS, 'openExternalLinksInNewWindow', {
-    get: function () {
-      return PDFJS.externalLinkTarget === LinkTarget.BLANK;
-    },
-    set: function (value) {
-      if (value) {
-        deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
-          '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
-      }
-      if (PDFJS.externalLinkTarget !== LinkTarget.NONE) {
-        warn('PDFJS.externalLinkTarget is already initialized');
-        return;
-      }
-      PDFJS.externalLinkTarget = value ? LinkTarget.BLANK : LinkTarget.NONE;
-    },
-    enumerable: true,
-    configurable: true
-  });
-  if (savedOpenExternalLinksInNewWindow) {
-    /**
-     * (Deprecated) Opens external links in a new window if enabled.
-     * The default behavior opens external links in the PDF.js window.
-     *
-     * NOTE: This property has been deprecated, please use
-     *       `PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK` instead.
-     * @var {boolean}
-     */
-    PDFJS.openExternalLinksInNewWindow = savedOpenExternalLinksInNewWindow;
+  if (typeof PDFJSDev === 'undefined' || !PDFJSDev.test('MOZCENTRAL')) {
+    var savedOpenExternalLinksInNewWindow = PDFJS.openExternalLinksInNewWindow;
+    delete PDFJS.openExternalLinksInNewWindow;
+    Object.defineProperty(PDFJS, 'openExternalLinksInNewWindow', {
+      get: function () {
+        return PDFJS.externalLinkTarget === LinkTarget.BLANK;
+      },
+      set: function (value) {
+        if (value) {
+          deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
+            '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
+        }
+        if (PDFJS.externalLinkTarget !== LinkTarget.NONE) {
+          warn('PDFJS.externalLinkTarget is already initialized');
+          return;
+        }
+        PDFJS.externalLinkTarget = value ? LinkTarget.BLANK : LinkTarget.NONE;
+      },
+      enumerable: true,
+      configurable: true
+    });
+    if (savedOpenExternalLinksInNewWindow) {
+      /**
+       * (Deprecated) Opens external links in a new window if enabled.
+       * The default behavior opens external links in the PDF.js window.
+       *
+       * NOTE: This property has been deprecated, please use
+       *       `PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK` instead.
+       * @var {boolean}
+       */
+      PDFJS.openExternalLinksInNewWindow = savedOpenExternalLinksInNewWindow;
+    }
   }
-//#endif
 
   PDFJS.getDocument = displayAPI.getDocument;
   PDFJS.PDFDataRangeTransport = displayAPI.PDFDataRangeTransport;

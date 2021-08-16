@@ -26,6 +26,12 @@ var LinkServiceMock = (function LinkServiceMockClosure() {
   function LinkServiceMock() {}
 
   LinkServiceMock.prototype = {
+    get page() {
+      return 0;
+    },
+
+    set page(value) {},
+
     navigateTo: function (dest) {},
 
     getDestinationHash: function (dest) {
@@ -36,7 +42,13 @@ var LinkServiceMock = (function LinkServiceMockClosure() {
       return '#';
     },
 
-    executeNamedAction: function (action) {}
+    setHash: function (hash) {},
+
+    executeNamedAction: function (action) {},
+
+    onFileAttachmentAnnotation: function (params) {},
+
+    cachePageRef: function (pageNum, pageRef) {},
   };
 
   return LinkServiceMock;
@@ -288,7 +300,7 @@ var Driver = (function DriverClosure() {
       var self = this;
       window.onerror = function(message, source, line, column, error) {
         self._info('Error: ' + message + ' Script: ' + source + ' Line: ' +
-                  line + ' Column: ' + column + ' StackTrace: ' +  error);
+                   line + ' Column: ' + column + ' StackTrace: ' + error);
       };
       this._info('User agent: ' + navigator.userAgent);
       this._log('Harness thinks this browser is "' + this.browser +
@@ -673,3 +685,5 @@ var Driver = (function DriverClosure() {
 
   return Driver;
 })();
+
+exports.Driver = Driver;

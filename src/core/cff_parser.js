@@ -348,10 +348,9 @@ var CFFParser = (function CFFParserClosure() {
           return ((value - 247) * 256) + dict[pos++] + 108;
         } else if (value >= 251 && value <= 254) {
           return -((value - 251) * 256) - dict[pos++] - 108;
-        } else {
-          error('255 is not a valid DICT command');
         }
-        return -1;
+        warn('CFFParser_parseDict: "' + value + '" is a reserved command.');
+        return NaN;
       }
 
       function parseFloatOperand() {
@@ -786,7 +785,6 @@ var CFFParser = (function CFFParserClosure() {
       var encoding = Object.create(null);
       var bytes = this.bytes;
       var predefined = false;
-      var hasSupplement = false;
       var format, i, ii;
       var raw = null;
 
@@ -837,7 +835,7 @@ var CFFParser = (function CFFParserClosure() {
             break;
         }
         var dataEnd = pos;
-        if (format & 0x80) {
+        if (format & 0x80) { // hasSupplement
           // The font sanitizer does not support CFF encoding with a
           // supplement, since the encoding is not really used to map
           // between gid to glyph, let's overwrite what is declared in
@@ -845,7 +843,6 @@ var CFFParser = (function CFFParserClosure() {
           // StandardEncoding, that's a lie but that's ok.
           bytes[dataStart] &= 0x7f;
           readSupplement();
-          hasSupplement = true;
         }
         raw = bytes.subarray(dataStart, dataEnd);
       }
@@ -1000,19 +997,22 @@ var CFFDict = (function CFFDictClosure() {
       if (!(key in this.keyToNameMap)) {
         return false;
       }
+      var valueLength = value.length;
       // ignore empty values
-      if (value.length === 0) {
+      if (valueLength === 0) {
         return true;
+      }
+      // Ignore invalid values (fixes bug1068432.pdf and bug1308536.pdf).
+      for (var i = 0; i < valueLength; i++) {
+        if (isNaN(value[i])) {
+          warn('Invalid CFFDict value: "' + value + '" for key "' + key + '".');
+          return true;
+        }
       }
       var type = this.types[key];
       // remove the array wrapping these types of values
       if (type === 'num' || type === 'sid' || type === 'offset') {
         value = value[0];
-        // Ignore invalid values (fixes bug 1068432).
-        if (isNaN(value)) {
-          warn('Invalid CFFDict value: ' + value + ', for key: ' + key + '.');
-          return true;
-        }
       }
       this.values[key] = value;
       return true;
@@ -1360,9 +1360,8 @@ var CFFCompiler = (function CFFCompilerClosure() {
     encodeNumber: function CFFCompiler_encodeNumber(value) {
       if (parseFloat(value) === parseInt(value, 10) && !isNaN(value)) { // isInt
         return this.encodeInteger(value);
-      } else {
-        return this.encodeFloat(value);
       }
+      return this.encodeFloat(value);
     },
     encodeFloat: function CFFCompiler_encodeFloat(num) {
       var value = num.toString();

@@ -34,7 +34,7 @@
  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/*globals jasmineRequire, jasmine, TestReporter */
+/* globals jasmineRequire, TestReporter */
 
 // Modified jasmine's boot.js file to load PDF.js libraries async.
 
@@ -67,7 +67,9 @@ function initializePDFJS(callback) {
 
   // Runner Parameters
   var queryString = new jasmine.QueryString({
-    getWindowLocation: function() { return window.location; }
+    getWindowLocation: function() {
+      return window.location;
+    }
   });
 
   var catchingExceptions = queryString.getParam('catch');
@@ -101,7 +103,9 @@ function initializePDFJS(callback) {
     addToExistingQueryString: function(key, value) {
       return queryString.fullStringWithNewParam(key, value);
     },
-    getContainer: function() { return document.body; },
+    getContainer: function() {
+      return document.body;
+    },
     createElement: function() {
       return document.createElement.apply(document, arguments);
     },
@@ -122,7 +126,9 @@ function initializePDFJS(callback) {
   // Filter which specs will be run by matching the start of the full name
   // against the `spec` query param.
   var specFilter = new jasmine.HtmlSpecFilter({
-    filterString: function() { return queryString.getParam('spec'); }
+    filterString: function() {
+      return queryString.getParam('spec');
+    }
   });
 
   env.specFilter = function(spec) {

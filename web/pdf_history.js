@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* globals chrome */
 
 'use strict';
 
@@ -113,7 +114,7 @@
         } else {
           updateHistoryWithCurrentHash();
         }
-      }, false);
+      });
 
 
       function updateHistoryWithCurrentHash() {
@@ -161,18 +162,17 @@
         }
         // Remove the event listener when navigating away from the document,
         // since 'beforeunload' prevents Firefox from caching the document.
-        window.removeEventListener('beforeunload', pdfHistoryBeforeUnload,
-                                   false);
+        window.removeEventListener('beforeunload', pdfHistoryBeforeUnload);
       }
 
-      window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
+      window.addEventListener('beforeunload', pdfHistoryBeforeUnload);
 
       window.addEventListener('pageshow', function pdfHistoryPageShow(evt) {
         // If the entire viewer (including the PDF file) is cached in
         // the browser, we need to reattach the 'beforeunload' event listener
         // since the 'DOMContentLoaded' event is not fired on 'pageshow'.
-        window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
-      }, false);
+        window.addEventListener('beforeunload', pdfHistoryBeforeUnload);
+      });
 
       self.eventBus.on('presentationmodechanged', function(e) {
         self.isViewerInPresentationMode = e.active;
@@ -191,30 +191,30 @@
 
     _pushOrReplaceState: function pdfHistory_pushOrReplaceState(stateObj,
                                                                 replace) {
-//#if CHROME
       // history.state.chromecomState is managed by chromecom.js.
-      if (window.history.state && 'chromecomState' in window.history.state) {
+      if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME') &&
+          window.history.state && 'chromecomState' in window.history.state) {
         stateObj = stateObj || {};
         stateObj.chromecomState = window.history.state.chromecomState;
       }
-//#endif
       if (replace) {
-//#if (GENERIC || CHROME)
-        window.history.replaceState(stateObj, '', document.URL);
-//#else
-//    window.history.replaceState(stateObj, '');
-//#endif
+        if (typeof PDFJSDev === 'undefined' ||
+            PDFJSDev.test('GENERIC || CHROME')) {
+          window.history.replaceState(stateObj, '', document.URL);
+        } else {
+          window.history.replaceState(stateObj, '');
+        }
       } else {
-//#if (GENERIC || CHROME)
-        window.history.pushState(stateObj, '', document.URL);
-//#else
-//    window.history.pushState(stateObj, '');
-//#endif
-//#if CHROME
-//    if (top === window) {
-//      chrome.runtime.sendMessage('showPageAction');
-//    }
-//#endif
+        if (typeof PDFJSDev === 'undefined' ||
+            PDFJSDev.test('GENERIC || CHROME')) {
+          window.history.pushState(stateObj, '', document.URL);
+        } else {
+          window.history.pushState(stateObj, '');
+        }
+        if (typeof PDFJSDev !== 'undefined' && PDFJSDev.test('CHROME') &&
+            top === window) {
+          chrome.runtime.sendMessage('showPageAction');
+        }
       }
     },
 
@@ -283,9 +283,8 @@
           this.nextHashParam = null;
           this.updatePreviousBookmark = true;
           return;
-        } else {
-          this.nextHashParam = null;
         }
+        this.nextHashParam = null;
       }
 
       if (params.hash) {

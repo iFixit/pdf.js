@@ -27,7 +27,12 @@
       root.pdfjsWebApp, root.pdfjsWebPDFJS);
   }
 }(this, function (exports, preferences, app, pdfjsLib) {
-//#if FIREFOX || MOZCENTRAL
+if (typeof PDFJSDev === 'undefined' ||
+    !PDFJSDev.test('FIREFOX || MOZCENTRAL')) {
+  throw new Error('Module "pdfjs-web/firefoxcom" shall not be used outside ' +
+                  'FIREFOX and MOZCENTRAL builds.');
+}
+
 var Preferences = preferences.Preferences;
 var PDFViewerApplication = app.PDFViewerApplication;
 
@@ -71,9 +76,9 @@ var FirefoxCom = (function FirefoxComClosure() {
 
           document.documentElement.removeChild(node);
 
-          document.removeEventListener('pdf.js.response', listener, false);
+          document.removeEventListener('pdf.js.response', listener);
           return callback(response);
-        }, false);
+        });
       }
       document.documentElement.appendChild(request);
 
@@ -168,7 +173,7 @@ Preferences._readFromStorage = function (prefObj) {
       highlightAll: !!evt.detail.highlightAll,
       findPrevious: !!evt.detail.findPrevious
     });
-  }.bind(this);
+  };
 
   for (var i = 0, len = events.length; i < len; i++) {
     window.addEventListener(events[i], handleEvent);
@@ -275,7 +280,7 @@ PDFViewerApplication.externalServices = {
   },
 };
 
-//// l10n.js for Firefox extension expects services to be set.
+// l10n.js for Firefox extension expects services to be set.
 document.mozL10n.setExternalLocalizerServices({
   getLocale: function () {
     return FirefoxCom.requestSync('getLocale', null);
@@ -288,5 +293,4 @@ document.mozL10n.setExternalLocalizerServices({
 
 exports.DownloadManager = DownloadManager;
 exports.FirefoxCom = FirefoxCom;
-//#endif
 }));

@@ -63,9 +63,11 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
 
     // Since this is a temporary canvas, we need to fill the canvas with a white
     // background ourselves. `_getPageDrawContext` uses CSS rules for this.
-//#if MOZCENTRAL || FIREFOX || GENERIC
-    tempCanvas.mozOpaque = true;
-//#endif
+    if (typeof PDFJSDev === 'undefined' ||
+        PDFJSDev.test('MOZCENTRAL || FIREFOX || GENERIC')) {
+      tempCanvas.mozOpaque = true;
+    }
+
     var ctx = tempCanvas.getContext('2d', {alpha: false});
     ctx.save();
     ctx.fillStyle = 'rgb(255, 255, 255)';
@@ -89,6 +91,7 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
 
     this.id = id;
     this.renderingId = 'thumbnail' + id;
+    this.pageLabel = null;
 
     this.pdfPage = null;
     this.rotation = 0;
@@ -98,8 +101,9 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
     this.linkService = linkService;
     this.renderingQueue = renderingQueue;
 
-    this.resume = null;
+    this.renderTask = null;
     this.renderingState = RenderingStates.INITIAL;
+    this.resume = null;
     this.disableCanvasToImageConversion = disableCanvasToImageConversion;
 
     this.pageWidth = this.viewport.width;
@@ -117,10 +121,11 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
       linkService.page = id;
       return false;
     };
+    this.anchor = anchor;
 
     var div = document.createElement('div');
-    div.id = 'thumbnailContainer' + id;
     div.className = 'thumbnail';
+    div.setAttribute('data-page-number', this.id);
     this.div = div;
 
     if (id === 1) {
@@ -151,11 +156,7 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
     },
 
     reset: function PDFThumbnailView_reset() {
-      if (this.renderTask) {
-        this.renderTask.cancel();
-      }
-      this.resume = null;
-      this.renderingState = RenderingStates.INITIAL;
+      this.cancelRendering();
 
       this.pageWidth = this.viewport.width;
       this.pageHeight = this.viewport.height;
@@ -199,6 +200,15 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
       this.reset();
     },
 
+    cancelRendering: function PDFThumbnailView_cancelRendering() {
+      if (this.renderTask) {
+        this.renderTask.cancel();
+        this.renderTask = null;
+      }
+      this.renderingState = RenderingStates.INITIAL;
+      this.resume = null;
+    },
+
     /**
      * @private
      */
@@ -209,9 +219,10 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
       // until rendering/image conversion is complete, to avoid display issues.
       this.canvas = canvas;
 
-//#if MOZCENTRAL || FIREFOX || GENERIC
-      canvas.mozOpaque = true;
-//#endif
+      if (typeof PDFJSDev === 'undefined' ||
+          PDFJSDev.test('MOZCENTRAL || FIREFOX || GENERIC')) {
+        canvas.mozOpaque = true;
+      }
       var ctx = canvas.getContext('2d', {alpha: false});
       var outputScale = getOutputScale(ctx);
 
@@ -238,7 +249,7 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
       }
       var id = this.renderingId;
       var className = 'thumbnailImage';
-      var ariaLabel = mozL10n.get('thumb_page_canvas', { page: this.id },
+      var ariaLabel = mozL10n.get('thumb_page_canvas', { page: this.pageId },
                                   'Thumbnail of Page {{page}}');
 
       if (this.disableCanvasToImageConversion) {
@@ -386,7 +397,32 @@ var PDFThumbnailView = (function PDFThumbnailViewClosure() {
       ctx.drawImage(reducedImage, 0, 0, reducedWidth, reducedHeight,
                     0, 0, canvas.width, canvas.height);
       this._convertCanvasToImage();
-    }
+    },
+
+    get pageId() {
+      return (this.pageLabel !== null ? this.pageLabel : this.id);
+    },
+
+    /**
+     * @param {string|null} label
+     */
+    setPageLabel: function PDFThumbnailView_setPageLabel(label) {
+      this.pageLabel = (typeof label === 'string' ? label : null);
+
+      this.anchor.title = mozL10n.get('thumb_page_title', { page: this.pageId },
+                                      'Page {{page}}');
+
+      if (this.renderingState !== RenderingStates.FINISHED) {
+        return;
+      }
+      var ariaLabel = mozL10n.get('thumb_page_canvas', { page: this.pageId },
+                                  'Thumbnail of Page {{page}}');
+      if (this.image) {
+        this.image.setAttribute('aria-label', ariaLabel);
+      } else if (this.disableCanvasToImageConversion && this.canvas) {
+        this.canvas.setAttribute('aria-label', ariaLabel);
+      }
+    },
   };
 
   return PDFThumbnailView;

@@ -87,7 +87,8 @@ var PDFThumbnailViewer = (function PDFThumbnailViewerClosure() {
       if (selected) {
         selected.classList.remove('selected');
       }
-      var thumbnail = document.getElementById('thumbnailContainer' + page);
+      var thumbnail = document.querySelector(
+        'div.thumbnail[data-page-number="' + page + '"]');
       if (thumbnail) {
         thumbnail.classList.add('selected');
       }
@@ -133,17 +134,17 @@ var PDFThumbnailViewer = (function PDFThumbnailViewerClosure() {
      */
     _resetView: function PDFThumbnailViewer_resetView() {
       this.thumbnails = [];
+      this._pageLabels = null;
       this._pagesRotation = 0;
       this._pagesRequests = [];
+
+      // Remove the thumbnails from the DOM.
+      this.container.textContent = '';
     },
 
     setDocument: function PDFThumbnailViewer_setDocument(pdfDocument) {
       if (this.pdfDocument) {
-        // cleanup of the elements and views
-        var thumbsView = this.container;
-        while (thumbsView.hasChildNodes()) {
-          thumbsView.removeChild(thumbsView.lastChild);
-        }
+        this._cancelRendering();
         this._resetView();
       }
 
@@ -167,6 +168,41 @@ var PDFThumbnailViewer = (function PDFThumbnailViewerClosure() {
           this.thumbnails.push(thumbnail);
         }
       }.bind(this));
+    },
+
+    /**
+     * @private
+     */
+    _cancelRendering: function PDFThumbnailViewer_cancelRendering() {
+      for (var i = 0, ii = this.thumbnails.length; i < ii; i++) {
+        if (this.thumbnails[i]) {
+          this.thumbnails[i].cancelRendering();
+        }
+      }
+    },
+
+    /**
+     * @param {Array|null} labels
+     */
+    setPageLabels: function PDFThumbnailViewer_setPageLabels(labels) {
+      if (!this.pdfDocument) {
+        return;
+      }
+      if (!labels) {
+        this._pageLabels = null;
+      } else if (!(labels instanceof Array &&
+                   this.pdfDocument.numPages === labels.length)) {
+        this._pageLabels = null;
+        console.error('PDFThumbnailViewer_setPageLabels: Invalid page labels.');
+      } else {
+        this._pageLabels = labels;
+      }
+      // Update all the `PDFThumbnailView` instances.
+      for (var i = 0, ii = this.thumbnails.length; i < ii; i++) {
+        var thumbnailView = this.thumbnails[i];
+        var label = this._pageLabels && this._pageLabels[i];
+        thumbnailView.setPageLabel(label);
+      }
     },
 
     /**

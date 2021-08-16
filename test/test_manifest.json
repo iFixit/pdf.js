@@ -784,6 +784,13 @@
        "link": false,
        "type": "load"
     },
+    {  "id": "bug1308536",
+       "file": "pdfs/bug1308536.pdf",
+       "md5": "cc2258981e33ad8d96acbf87318716d5",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
+    },
     {  "id": "bug1252420",
        "file": "pdfs/bug1252420.pdf",
        "md5": "f21c911b9b655972b06ef782a1fa6a17",
@@ -1044,6 +1051,14 @@
        "rounds": 1,
        "type": "eq"
     },
+    {  "id": "issue7665",
+       "file": "pdfs/issue7665.pdf",
+       "md5": "f1199d16195a61e8232e2d1e742ed46b",
+       "link": false,
+       "rounds": 1,
+       "type": "load",
+       "about": "Encrypted file with indirect objects in the /Encrypt dictionary."
+    },
     {  "id": "protectip",
        "file": "pdfs/protectip.pdf",
        "md5": "676e7a7b8f96d04825361832b1838a93",
@@ -1098,6 +1113,13 @@
        "rounds": 1,
        "type": "eq"
     },
+    {  "id": "issue7901",
+       "file": "pdfs/issue7901.pdf",
+       "md5": "16059a3af6e81ae9272daa57ea03e6e9",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
+    },
     {  "id": "tutorial",
        "file": "pdfs/tutorial.pdf",
        "md5": "6e122f618c27f3aa9a689423e3be6b8d",
@@ -1129,6 +1151,13 @@
        "link": true,
        "firstPage": 2,
        "lastPage": 2,
+       "type": "eq"
+    },
+    {  "id": "issue6071",
+       "file": "pdfs/issue6071.pdf",
+       "md5": "2e08526d8e7c9ba4269fc12ef488d3eb",
+       "rounds": 1,
+       "link": true,
        "type": "eq"
     },
     {  "id": "issue1905",
@@ -1327,6 +1356,14 @@
       "lastPage": 10,
       "link": true,
       "type": "eq"
+    },
+    {  "id": "issue7872",
+       "file": "pdfs/issue7872.pdf",
+       "md5": "81781dfecfcb7e9cd9cc7e60f8b747b7",
+       "rounds": 1,
+       "link": false,
+       "type": "eq",
+       "about": "MediaBox and CropBox with indirect objects."
     },
     {  "id": "issue2642",
       "file": "pdfs/issue2642.pdf",
@@ -1561,6 +1598,13 @@
        "lastPage": 1,
        "type": "eq"
     },
+    {  "id": "multiple-filters-length-zero",
+       "file": "pdfs/multiple-filters-length-zero.pdf",
+       "md5": "c273c3a6fb79cbf3034fe1b62b204728",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
+    },
     {  "id": "issue5752",
        "file": "pdfs/issue5752.pdf",
        "md5": "aa20ad7cff71e9481c0cd623ddbff3b7",
@@ -1587,6 +1631,13 @@
     {  "id": "TrueType_without_cmap",
        "file": "pdfs/TrueType_without_cmap.pdf",
        "md5": "afca8bb11f2e1f7298b4e5dd85785fb0",
+       "link": false,
+       "rounds": 1,
+       "type": "eq"
+    },
+    {  "id": "non-embedded-NuptialScript",
+       "file": "pdfs/non-embedded-NuptialScript.pdf",
+       "md5": "94225085d3fbf5d2d12b8be1c52bb3c1",
        "link": false,
        "rounds": 1,
        "type": "eq"
@@ -1660,6 +1711,20 @@
        "rounds": 1,
        "link": false,
        "type": "eq"
+    },
+    {  "id": "issue7580-eq",
+       "file": "pdfs/issue7580.pdf",
+       "md5": "44dd5a9b4373fcab9890cf567722a766",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
+    },
+    {  "id": "issue7580-text",
+       "file": "pdfs/issue7580.pdf",
+       "md5": "44dd5a9b4373fcab9890cf567722a766",
+       "rounds": 1,
+       "link": false,
+       "type": "text"
     },
     {  "id": "issue6612-text",
        "file": "pdfs/issue6612.pdf",
@@ -1790,6 +1855,13 @@
        "link": false,
        "type": "eq"
     },
+    {  "id": "issue7835",
+       "file": "pdfs/issue7835.pdf",
+       "md5": "afb3206a83ee3fd19f3dea0480f942ec",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
+    },
     {  "id": "issue5972",
        "file": "pdfs/issue5972.pdf",
        "md5": "51f03e1d38410b04c9dda7e75fe8a0a3",
@@ -1802,6 +1874,13 @@
       "md5": "ffe9c571d0a1572e234253e6c7cdee6c",
       "rounds": 1,
       "type": "eq"
+    },
+    {  "id": "issue7855",
+       "file": "pdfs/issue7855.pdf",
+       "md5": "290d4d5da041ffbcb1ea5d3b0ed8ee91",
+       "rounds": 1,
+       "link": false,
+       "type": "eq"
     },
     {  "id": "issue6068",
        "file": "pdfs/issue6068.pdf",
@@ -3233,6 +3312,34 @@
        "type": "eq",
        "forms": true
     },
+    {  "id": "annotation-choice-widget-annotations",
+       "file": "pdfs/annotation-choice-widget.pdf",
+       "md5": "7dfb0d743a0da0f4a71b209ab43b0be5",
+       "rounds": 1,
+       "type": "eq",
+       "annotations": true
+    },
+    {  "id": "annotation-choice-widget-forms",
+       "file": "pdfs/annotation-choice-widget.pdf",
+       "md5": "7dfb0d743a0da0f4a71b209ab43b0be5",
+       "rounds": 1,
+       "type": "eq",
+       "forms": true
+    },
+    {  "id": "annotation-button-widget-annotations",
+       "file": "pdfs/annotation-button-widget.pdf",
+       "md5": "5cf23adfff84256d9cfe261bea96dade",
+       "rounds": 1,
+       "type": "eq",
+       "annotations": true
+    },
+    {  "id": "annotation-button-widget-forms",
+       "file": "pdfs/annotation-button-widget.pdf",
+       "md5": "5cf23adfff84256d9cfe261bea96dade",
+       "rounds": 1,
+       "type": "eq",
+       "forms": true
+    },
     {  "id": "issue6108",
        "file": "pdfs/issue6108.pdf",
        "md5": "8961cb55149495989a80bf0487e0f076",
@@ -3245,6 +3352,20 @@
        "link": false,
        "rounds": 1,
        "lastPage": 1,
+       "type": "text"
+    },
+    {  "id": "operator-in-TJ-array",
+       "file": "pdfs/operator-in-TJ-array.pdf",
+       "md5": "dfe0f15a45be18eca142adaf760984ee",
+       "link": false,
+       "rounds": 1,
+       "type": "text"
+    },
+    {  "id": "issue7878",
+       "file": "pdfs/issue7878.pdf",
+       "md5": "59194e30037e8c09ae846ddd0ace4c81",
+       "link": false,
+       "rounds": 1,
        "type": "text"
     }
 ]

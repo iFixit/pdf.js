@@ -1,7 +1,40 @@
-/* globals describe, it, expect, beforeAll, afterAll, Stream, CFFParser,
-           SEAC_ANALYSIS_ENABLED, CFFIndex, CFFStrings, CFFCompiler */
-
+/* Copyright 2017 Mozilla Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 'use strict';
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define('pdfjs-test/unit/cff_parser_spec', ['exports',
+           'pdfjs/core/cff_parser', 'pdfjs/core/fonts',
+           'pdfjs/core/stream'], factory);
+  } else if (typeof exports !== 'undefined') {
+    factory(exports, require('../../src/core/cff_parser.js'),
+            require('../../src/core/fonts.js'),
+            require('../../src/core/stream.js'));
+  } else {
+    factory((root.pdfjsTestUnitCFFParserSpec = {}), root.pdfjsCoreCFFParser,
+             root.pdfjsCoreFonts, root.pdfjsCoreStream);
+  }
+}(this, function (exports, coreCFFParser, coreFonts, coreStream) {
+
+var CFFParser = coreCFFParser.CFFParser;
+var CFFIndex = coreCFFParser.CFFIndex;
+var CFFStrings = coreCFFParser.CFFStrings;
+var CFFCompiler = coreCFFParser.CFFCompiler;
+var SEAC_ANALYSIS_ENABLED = coreFonts.SEAC_ANALYSIS_ENABLED;
+var Stream = coreStream.Stream;
 
 describe('CFFParser', function() {
   function createWithNullProto(obj) {
@@ -33,14 +66,22 @@ describe('CFFParser', function() {
       fontArr.push(parseInt(hex, 16));
     }
     fontData = new Stream(fontArr);
+    done();
+  });
 
+  afterAll(function () {
+    fontData = null;
+  });
+
+  beforeEach(function (done) {
     parser = new CFFParser(fontData, {}, SEAC_ANALYSIS_ENABLED);
     cff = parser.parse();
     done();
   });
 
-  afterAll(function () {
-    fontData = parser = cff = null;
+  afterEach(function (done) {
+    parser = cff = null;
+    done();
   });
 
   it('parses header', function() {
@@ -104,6 +145,24 @@ describe('CFFParser', function() {
     expect(topDict.getByName('UnderlinePosition')).toEqual(defaultValue);
   });
 
+  it('ignores reserved commands in parseDict, and refuses to add privateDict ' +
+     'keys with invalid values (bug 1308536)', function () {
+    var bytes = new Uint8Array([
+      64, 39, 31, 30, 252, 114, 137, 115, 79, 30, 197, 119, 2, 99, 127, 6
+    ]);
+    parser.bytes = bytes;
+    var topDict = cff.topDict;
+    topDict.setByName('Private', [bytes.length, 0]);
+
+    var parsePrivateDict = function () {
+      parser.parsePrivateDict(topDict);
+    };
+    expect(parsePrivateDict).not.toThrow();
+
+    var privateDict = topDict.privateDict;
+    expect(privateDict.getByName('BlueValues')).toBeNull();
+  });
+
   it('parses a CharString having cntrmask', function() {
     var bytes = new Uint8Array([0, 1, // count
                                 1,  // offsetSize
@@ -130,7 +189,7 @@ describe('CFFParser', function() {
   it('parses a CharString endchar with 4 args w/seac enabled', function() {
     var parser = new CFFParser(fontData, {},
                                /* seacAnalysisEnabled = */ true);
-    var cff = parser.parse();
+    parser.parse(); // cff
 
     var bytes = new Uint8Array([0, 1, // count
                                 1,  // offsetSize
@@ -152,7 +211,7 @@ describe('CFFParser', function() {
   it('parses a CharString endchar with 4 args w/seac disabled', function() {
     var parser = new CFFParser(fontData, {},
                                /* seacAnalysisEnabled = */ false);
-    var cff = parser.parse();
+    parser.parse(); // cff
 
     var bytes = new Uint8Array([0, 1, // count
                                 1,  // offsetSize
@@ -329,3 +388,4 @@ describe('CFFCompiler', function() {
 
   // TODO a lot more compiler tests
 });
+}));

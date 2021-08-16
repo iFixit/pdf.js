@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* jshint -W043 */
+/* eslint-disable no-multi-str */
 
 'use strict';
 
@@ -83,6 +83,8 @@ var WebGLUtils = (function WebGLUtilsClosure() {
     if (currentGL) {
       return;
     }
+
+    // The temporary canvas is used in the WebGL context.
     currentCanvas = document.createElement('canvas');
     currentGL = currentCanvas.getContext('webgl',
       { premultipliedalpha: false });
@@ -165,12 +167,12 @@ var WebGLUtils = (function WebGLUtilsClosure() {
     var texCoordBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-      0.0,  0.0,
-      1.0,  0.0,
-      0.0,  1.0,
-      0.0,  1.0,
-      1.0,  0.0,
-      1.0,  1.0]), gl.STATIC_DRAW);
+      0.0, 0.0,
+      1.0, 0.0,
+      0.0, 1.0,
+      0.0, 1.0,
+      1.0, 0.0,
+      1.0, 1.0]), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(texCoordLocation);
     gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
@@ -186,7 +188,7 @@ var WebGLUtils = (function WebGLUtilsClosure() {
     if (!smaskCache) {
       initSmaskGL();
     }
-    var cache = smaskCache,canvas = cache.canvas, gl = cache.gl;
+    var cache = smaskCache, canvas = cache.canvas, gl = cache.gl;
     canvas.width = width;
     canvas.height = height;
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);

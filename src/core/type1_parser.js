@@ -86,7 +86,7 @@ var Type1CharString = (function Type1CharStringClosure() {
     'rrcurveto': [8],
     'callsubr': [10],
     'flex': [12, 35],
-    'drop' : [12, 18],
+    'drop': [12, 18],
     'endchar': [14],
     'rmoveto': [21],
     'hmoveto': [22],
@@ -251,7 +251,7 @@ var Type1CharString = (function Type1CharStringClosure() {
               // first part of the charstring and then use rmoveto with
               // (dx, dy). The height argument will not be used for vmtx and
               // vhea tables reconstruction -- ignoring it.
-              var wy = this.stack.pop();
+              this.stack.pop(); // wy
               wx = this.stack.pop();
               var sby = this.stack.pop();
               sbx = this.stack.pop();
@@ -483,7 +483,7 @@ var Type1Parser = (function Type1ParserClosure() {
       return token === 'true' ? 1 : 0;
     },
 
-    nextChar : function Type1_nextChar() {
+    nextChar: function Type1_nextChar() {
       return (this.currentChar = this.stream.getByte());
     },
 
@@ -550,7 +550,7 @@ var Type1Parser = (function Type1ParserClosure() {
             this.getToken(); // read in 'dict'
             this.getToken(); // read in 'dup'
             this.getToken(); // read in 'begin'
-            while(true) {
+            while (true) {
               token = this.getToken();
               if (token === null || token === 'end') {
                 break;
@@ -579,7 +579,7 @@ var Type1Parser = (function Type1ParserClosure() {
             }
             break;
           case 'Subrs':
-            var num = this.readInt();
+            this.readInt(); // num
             this.getToken(); // read in 'array'
             while ((token = this.getToken()) === 'dup') {
               var index = this.readInt();

@@ -38,14 +38,10 @@ var AnnotationFlag = sharedUtil.AnnotationFlag;
 var AnnotationType = sharedUtil.AnnotationType;
 var OPS = sharedUtil.OPS;
 var Util = sharedUtil.Util;
-var isBool = sharedUtil.isBool;
-var isString = sharedUtil.isString;
 var isArray = sharedUtil.isArray;
 var isInt = sharedUtil.isInt;
-var isValidUrl = sharedUtil.isValidUrl;
 var stringToBytes = sharedUtil.stringToBytes;
 var stringToPDFString = sharedUtil.stringToPDFString;
-var stringToUTF8String = sharedUtil.stringToUTF8String;
 var warn = sharedUtil.warn;
 var Dict = corePrimitives.Dict;
 var isDict = corePrimitives.isDict;
@@ -53,6 +49,7 @@ var isName = corePrimitives.isName;
 var isRef = corePrimitives.isRef;
 var Stream = coreStream.Stream;
 var ColorSpace = coreColorSpace.ColorSpace;
+var Catalog = coreObj.Catalog;
 var ObjectLoader = coreObj.ObjectLoader;
 var FileSpec = coreObj.FileSpec;
 var OperatorList = coreEvaluator.OperatorList;
@@ -66,18 +63,16 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
   /**
    * @param {XRef} xref
    * @param {Object} ref
-   * @param {string} uniquePrefix
-   * @param {Object} idCounters
+   * @param {PDFManager} pdfManager
+   * @param {Object} idFactory
    * @returns {Annotation}
    */
-  create: function AnnotationFactory_create(xref, ref,
-                                            uniquePrefix, idCounters) {
+  create: function AnnotationFactory_create(xref, ref, pdfManager, idFactory) {
     var dict = xref.fetchIfRef(ref);
     if (!isDict(dict)) {
       return;
     }
-    var id = isRef(ref) ? ref.toString() :
-                          'annot_' + (uniquePrefix || '') + (++idCounters.obj);
+    var id = isRef(ref) ? ref.toString() : 'annot_' + idFactory.createObjId();
 
     // Determine the annotation's subtype.
     var subtype = dict.get('Subtype');
@@ -90,6 +85,7 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       ref: isRef(ref) ? ref : null,
       subtype: subtype,
       id: id,
+      pdfManager: pdfManager,
     };
 
     switch (subtype) {
@@ -106,6 +102,10 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
         switch (fieldType) {
           case 'Tx':
             return new TextWidgetAnnotation(parameters);
+          case 'Btn':
+            return new ButtonWidgetAnnotation(parameters);
+          case 'Ch':
+            return new ChoiceWidgetAnnotation(parameters);
         }
         warn('Unimplemented widget field type "' + fieldType + '", ' +
              'falling back to base field type.');
@@ -433,7 +433,7 @@ var Annotation = (function AnnotationClosure() {
         // Properties
       ]);
       var bbox = appearanceDict.getArray('BBox') || [0, 0, 1, 1];
-      var matrix = appearanceDict.getArray('Matrix') || [1, 0, 0, 1, 0 ,0];
+      var matrix = appearanceDict.getArray('Matrix') || [1, 0, 0, 1, 0, 0];
       var transform = getTransformMatrix(data.rect, bbox, matrix);
       var self = this;
 
@@ -619,8 +619,9 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     var data = this.data;
 
     data.annotationType = AnnotationType.WIDGET;
-    data.fieldValue = stringToPDFString(
-      Util.getInheritableProperty(dict, 'V') || '');
+    data.fieldName = this._constructFieldName(dict);
+    data.fieldValue = Util.getInheritableProperty(dict, 'V',
+                                                  /* getArray = */ true);
     data.alternativeText = stringToPDFString(dict.get('TU') || '');
     data.defaultAppearance = Util.getInheritableProperty(dict, 'DA') || '';
     var fieldType = Util.getInheritableProperty(dict, 'FT');
@@ -632,45 +633,55 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
       data.fieldFlags = 0;
     }
 
+    data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
+
     // Hide signatures because we cannot validate them.
     if (data.fieldType === 'Sig') {
       this.setFlags(AnnotationFlag.HIDDEN);
     }
-
-    // Building the full field name by collecting the field and
-    // its ancestors 'T' data and joining them using '.'.
-    var fieldName = [];
-    var namedItem = dict;
-    var ref = params.ref;
-    while (namedItem) {
-      var parent = namedItem.get('Parent');
-      var parentRef = namedItem.getRaw('Parent');
-      var name = namedItem.get('T');
-      if (name) {
-        fieldName.unshift(stringToPDFString(name));
-      } else if (parent && ref) {
-        // The field name is absent, that means more than one field
-        // with the same name may exist. Replacing the empty name
-        // with the '`' plus index in the parent's 'Kids' array.
-        // This is not in the PDF spec but necessary to id the
-        // the input controls.
-        var kids = parent.get('Kids');
-        var j, jj;
-        for (j = 0, jj = kids.length; j < jj; j++) {
-          var kidRef = kids[j];
-          if (kidRef.num === ref.num && kidRef.gen === ref.gen) {
-            break;
-          }
-        }
-        fieldName.unshift('`' + j);
-      }
-      namedItem = parent;
-      ref = parentRef;
-    }
-    data.fullName = fieldName.join('.');
   }
 
   Util.inherit(WidgetAnnotation, Annotation, {
+    /**
+     * Construct the (fully qualified) field name from the (partial) field
+     * names of the field and its ancestors.
+     *
+     * @private
+     * @memberof WidgetAnnotation
+     * @param {Dict} dict - Complete widget annotation dictionary
+     * @return {string}
+     */
+    _constructFieldName: function WidgetAnnotation_constructFieldName(dict) {
+      // Both the `Parent` and `T` fields are optional. While at least one of
+      // them should be provided, bad PDF generators may fail to do so.
+      if (!dict.has('T') && !dict.has('Parent')) {
+        warn('Unknown field name, falling back to empty field name.');
+        return '';
+      }
+
+      // If no parent exists, the partial and fully qualified names are equal.
+      if (!dict.has('Parent')) {
+        return stringToPDFString(dict.get('T'));
+      }
+
+      // Form the fully qualified field name by appending the partial name to
+      // the parent's fully qualified name, separated by a period.
+      var fieldName = [];
+      if (dict.has('T')) {
+        fieldName.unshift(stringToPDFString(dict.get('T')));
+      }
+
+      var loopDict = dict;
+      while (loopDict.has('Parent')) {
+        loopDict = loopDict.get('Parent');
+
+        if (loopDict.has('T')) {
+          fieldName.unshift(stringToPDFString(loopDict.get('T')));
+        }
+      }
+      return fieldName.join('.');
+    },
+
     /**
      * Check if a provided field flag is set.
      *
@@ -693,6 +704,9 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   function TextWidgetAnnotation(params) {
     WidgetAnnotation.call(this, params);
 
+    // The field value is always a string.
+    this.data.fieldValue = stringToPDFString(this.data.fieldValue || '');
+
     // Determine the alignment of text in the field.
     var alignment = Util.getInheritableProperty(params.dict, 'Q');
     if (!isInt(alignment) || alignment < 0 || alignment > 2) {
@@ -708,7 +722,6 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     this.data.maxLen = maximumLength;
 
     // Process field flags for the display layer.
-    this.data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
     this.data.multiLine = this.hasFieldFlag(AnnotationFieldFlag.MULTILINE);
     this.data.comb = this.hasFieldFlag(AnnotationFieldFlag.COMB) &&
                      !this.hasFieldFlag(AnnotationFieldFlag.MULTILINE) &&
@@ -752,6 +765,136 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   return TextWidgetAnnotation;
 })();
 
+var ButtonWidgetAnnotation = (function ButtonWidgetAnnotationClosure() {
+  function ButtonWidgetAnnotation(params) {
+    WidgetAnnotation.call(this, params);
+
+    this.data.checkBox = !this.hasFieldFlag(AnnotationFieldFlag.RADIO) &&
+                         !this.hasFieldFlag(AnnotationFieldFlag.PUSHBUTTON);
+    if (this.data.checkBox) {
+      if (!isName(this.data.fieldValue)) {
+        return;
+      }
+      this.data.fieldValue = this.data.fieldValue.name;
+    }
+
+    this.data.radioButton = this.hasFieldFlag(AnnotationFieldFlag.RADIO) &&
+                            !this.hasFieldFlag(AnnotationFieldFlag.PUSHBUTTON);
+    if (this.data.radioButton) {
+      this.data.fieldValue = this.data.buttonValue = null;
+
+      // The parent field's `V` entry holds a `Name` object with the appearance
+      // state of whichever child field is currently in the "on" state.
+      var fieldParent = params.dict.get('Parent');
+      if (!isDict(fieldParent) || !fieldParent.has('V')) {
+        return;
+      }
+      var fieldParentValue = fieldParent.get('V');
+      if (!isName(fieldParentValue)) {
+        return;
+      }
+      this.data.fieldValue = fieldParentValue.name;
+
+      // The button's value corresponds to its appearance state.
+      var appearanceStates = params.dict.get('AP');
+      if (!isDict(appearanceStates)) {
+        return;
+      }
+      var normalAppearanceState = appearanceStates.get('N');
+      if (!isDict(normalAppearanceState)) {
+        return;
+      }
+      var keys = normalAppearanceState.getKeys();
+      for (var i = 0, ii = keys.length; i < ii; i++) {
+        if (keys[i] !== 'Off') {
+          this.data.buttonValue = keys[i];
+          break;
+        }
+      }
+    }
+  }
+
+  Util.inherit(ButtonWidgetAnnotation, WidgetAnnotation, {
+    getOperatorList:
+        function ButtonWidgetAnnotation_getOperatorList(evaluator, task,
+                                                        renderForms) {
+      var operatorList = new OperatorList();
+
+      // Do not render form elements on the canvas when interactive forms are
+      // enabled. The display layer is responsible for rendering them instead.
+      if (renderForms) {
+        return Promise.resolve(operatorList);
+      }
+
+      if (this.appearance) {
+        return Annotation.prototype.getOperatorList.call(this, evaluator, task,
+                                                         renderForms);
+      }
+      return Promise.resolve(operatorList);
+    }
+  });
+
+  return ButtonWidgetAnnotation;
+})();
+
+var ChoiceWidgetAnnotation = (function ChoiceWidgetAnnotationClosure() {
+  function ChoiceWidgetAnnotation(params) {
+    WidgetAnnotation.call(this, params);
+
+    // Determine the options. The options array may consist of strings or
+    // arrays. If the array consists of arrays, then the first element of
+    // each array is the export value and the second element of each array is
+    // the display value. If the array consists of strings, then these
+    // represent both the export and display value. In this case, we convert
+    // it to an array of arrays as well for convenience in the display layer.
+    this.data.options = [];
+
+    var options = params.dict.get('Opt');
+    if (isArray(options)) {
+      var xref = params.xref;
+      for (var i = 0, ii = options.length; i < ii; i++) {
+        var option = xref.fetchIfRef(options[i]);
+        var isOptionArray = isArray(option);
+
+        this.data.options[i] = {
+          exportValue: isOptionArray ? xref.fetchIfRef(option[0]) : option,
+          displayValue: isOptionArray ? xref.fetchIfRef(option[1]) : option,
+        };
+      }
+    }
+
+    // Determine the field value. In this case, it may be a string or an
+    // array of strings. For convenience in the display layer, convert the
+    // string to an array of one string as well.
+    if (!isArray(this.data.fieldValue)) {
+      this.data.fieldValue = [this.data.fieldValue];
+    }
+
+    // Process field flags for the display layer.
+    this.data.combo = this.hasFieldFlag(AnnotationFieldFlag.COMBO);
+    this.data.multiSelect = this.hasFieldFlag(AnnotationFieldFlag.MULTISELECT);
+  }
+
+  Util.inherit(ChoiceWidgetAnnotation, WidgetAnnotation, {
+    getOperatorList:
+        function ChoiceWidgetAnnotation_getOperatorList(evaluator, task,
+                                                        renderForms) {
+      var operatorList = new OperatorList();
+
+      // Do not render form elements on the canvas when interactive forms are
+      // enabled. The display layer is responsible for rendering them instead.
+      if (renderForms) {
+        return Promise.resolve(operatorList);
+      }
+
+      return Annotation.prototype.getOperatorList.call(this, evaluator, task,
+                                                       renderForms);
+    }
+  });
+
+  return ChoiceWidgetAnnotation;
+})();
+
 var TextAnnotation = (function TextAnnotationClosure() {
   var DEFAULT_ICON_SIZE = 22; // px
 
@@ -780,103 +923,14 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
   function LinkAnnotation(params) {
     Annotation.call(this, params);
 
-    var dict = params.dict;
     var data = this.data;
     data.annotationType = AnnotationType.LINK;
 
-    var action = dict.get('A'), url, dest;
-    if (action && isDict(action)) {
-      var linkType = action.get('S').name;
-      switch (linkType) {
-        case 'URI':
-          url = action.get('URI');
-          if (isName(url)) {
-            // Some bad PDFs do not put parentheses around relative URLs.
-            url = '/' + url.name;
-          } else if (url) {
-            url = addDefaultProtocolToUrl(url);
-          }
-          // TODO: pdf spec mentions urls can be relative to a Base
-          // entry in the dictionary.
-          break;
-
-        case 'GoTo':
-          dest = action.get('D');
-          break;
-
-        case 'GoToR':
-          var urlDict = action.get('F');
-          if (isDict(urlDict)) {
-            // We assume that we found a FileSpec dictionary
-            // and fetch the URL without checking any further.
-            url = urlDict.get('F') || null;
-          } else if (isString(urlDict)) {
-            url = urlDict;
-          }
-
-          // NOTE: the destination is relative to the *remote* document.
-          var remoteDest = action.get('D');
-          if (remoteDest) {
-            if (isName(remoteDest)) {
-              remoteDest = remoteDest.name;
-            }
-            if (isString(url)) {
-              var baseUrl = url.split('#')[0];
-              if (isString(remoteDest)) {
-                // In practice, a named destination may contain only a number.
-                // If that happens, use the '#nameddest=' form to avoid the link
-                // redirecting to a page, instead of the correct destination.
-                url = baseUrl + '#' +
-                  (/^\d+$/.test(remoteDest) ? 'nameddest=' : '') + remoteDest;
-              } else if (isArray(remoteDest)) {
-                url = baseUrl + '#' + JSON.stringify(remoteDest);
-              }
-            }
-          }
-          // The 'NewWindow' property, equal to `LinkTarget.BLANK`.
-          var newWindow = action.get('NewWindow');
-          if (isBool(newWindow)) {
-            data.newWindow = newWindow;
-          }
-          break;
-
-        case 'Named':
-          data.action = action.get('N').name;
-          break;
-
-        default:
-          warn('unrecognized link type: ' + linkType);
-      }
-    } else if (dict.has('Dest')) { // Simple destination link.
-      dest = dict.get('Dest');
-    }
-
-    if (url) {
-      if (isValidUrl(url, /* allowRelative = */ false)) {
-        data.url = tryConvertUrlEncoding(url);
-      }
-    }
-    if (dest) {
-      data.dest = isName(dest) ? dest.name : dest;
-    }
-  }
-
-  // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
-  function addDefaultProtocolToUrl(url) {
-    if (isString(url) && url.indexOf('www.') === 0) {
-      return ('http://' + url);
-    }
-    return url;
-  }
-
-  function tryConvertUrlEncoding(url) {
-    // According to ISO 32000-1:2008, section 12.6.4.7, URIs should be encoded
-    // in 7-bit ASCII. Some bad PDFs use UTF-8 encoding, see Bugzilla 1122280.
-    try {
-      return stringToUTF8String(url);
-    } catch (e) {
-      return url;
-    }
+    Catalog.parseDestDictionary({
+      destDict: params.dict,
+      resultObj: data,
+      docBaseUrl: params.pdfManager.docBaseUrl,
+    });
   }
 
   Util.inherit(LinkAnnotation, Annotation, {});

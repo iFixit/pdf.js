@@ -271,8 +271,6 @@ var ChunkedStream = (function ChunkedStreamClosure() {
       subStream.dict = dict;
       return subStream;
     },
-
-    isStream: true
   };
 
   return ChunkedStream;
@@ -432,7 +430,9 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
         }
       }
 
-      chunksToRequest.sort(function(a, b) { return a - b; });
+      chunksToRequest.sort(function(a, b) {
+        return a - b;
+      });
       return this._requestChunks(chunksToRequest);
     },
 
@@ -568,7 +568,7 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
       if (this.pdfNetworkStream) {
         this.pdfNetworkStream.cancelAllRequests('abort');
       }
-      for(var requestId in this.promisesByRequest) {
+      for (var requestId in this.promisesByRequest) {
         var capability = this.promisesByRequest[requestId];
         capability.reject(new Error('Request was aborted'));
       }

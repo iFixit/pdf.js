@@ -53,9 +53,9 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
     var offset = (getUshort(data, start + 2) === 1 ?
                   getLong(data, start + 8) : getLong(data, start + 16));
     var format = getUshort(data, start + offset);
-    var length, ranges, p, i;
+    var ranges, p, i;
     if (format === 4) {
-      length = getUshort(data, start + offset + 2);
+      getUshort(data, start + offset + 2); // length
       var segCount = getUshort(data, start + offset + 6) >> 1;
       p = start + offset + 14;
       ranges = [];
@@ -82,7 +82,7 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
       }
       return ranges;
     } else if (format === 12) {
-      length = getLong(data, start + offset + 4);
+      getLong(data, start + offset + 4); // length
       var groups = getLong(data, start + offset + 12);
       p = start + offset + 16;
       ranges = [];
@@ -296,7 +296,7 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
         for (j = 1, jj = contour.length; j < jj; j++) {
           if ((contour[j].flags & 1)) {
             lineTo(contour[j].x, contour[j].y);
-          } else if ((contour[j + 1].flags & 1)){
+          } else if ((contour[j + 1].flags & 1)) {
             quadraticCurveTo(contour[j].x, contour[j].y,
                              contour[j + 1].x, contour[j + 1].y);
             j++;
@@ -437,7 +437,7 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
                 x = xb; y = yb;
                 if (Math.abs(x - x0) > Math.abs(y - y0)) {
                   x += stack.shift();
-                } else  {
+                } else {
                   y += stack.shift();
                 }
                 bezierCurveTo(xa, ya, xb, yb, x, y);
@@ -729,9 +729,8 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
                           [1 / unitsPerEm, 0, 0, 1 / unitsPerEm, 0, 0]);
         return new TrueTypeCompiled(
           parseGlyfTable(glyf, loca, indexToLocFormat), cmap, fontMatrix);
-      } else {
-        return new Type2Compiled(cff, cmap, font.fontMatrix, font.glyphNameMap);
       }
+      return new Type2Compiled(cff, cmap, font.fontMatrix, font.glyphNameMap);
     }
   };
 })();

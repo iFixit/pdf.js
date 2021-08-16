@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* globals WeakMap */
 
 'use strict';
 
@@ -187,10 +186,12 @@ var renderTextLayer = (function renderTextLayerClosure() {
       return;
     }
 
+    // The temporary canvas is used to measure text length in the DOM.
     var canvas = document.createElement('canvas');
-//#if MOZCENTRAL || FIREFOX || GENERIC
-    canvas.mozOpaque = true;
-//#endif
+    if (typeof PDFJSDev === 'undefined' ||
+        PDFJSDev.test('FIREFOX || MOZCENTRAL || GENERIC')) {
+       canvas.mozOpaque = true;
+    }
     var ctx = canvas.getContext('2d', {alpha: false});
 
     var lastFontSize;
@@ -347,7 +348,9 @@ var renderTextLayer = (function renderTextLayerClosure() {
 
   function expandBoundsLTR(width, bounds) {
     // Sorting by x1 coordinate and walk by the bounds in the same order.
-    bounds.sort(function (a, b) { return a.x1 - b.x1 || a.index - b.index; });
+    bounds.sort(function (a, b) {
+      return a.x1 - b.x1 || a.index - b.index;
+    });
 
     // First we see on the horizon is a fake boundary.
     var fakeBoundary = {
@@ -373,7 +376,7 @@ var renderTextLayer = (function renderTextLayerClosure() {
         i++;
       }
       var j = horizon.length - 1;
-      while(j >= 0 && horizon[j].start >= boundary.y2) {
+      while (j >= 0 && horizon[j].start >= boundary.y2) {
         j--;
       }
 
